@@ -32,6 +32,10 @@
 /data/claude/plugins/
 /data/claude/.claude.json
 
+# Configuration
+/data/.env
+push_repo.js
+
 # SQLite WAL and shared memory files (ephemeral)
 *.sqlite-wal
 *.sqlite-shm

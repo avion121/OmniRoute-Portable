@@ -59,6 +59,11 @@ if not exist "%DATA_DIR%" mkdir "%DATA_DIR%"
 if not exist "%HOME_DIR%" mkdir "%HOME_DIR%"
 if not exist "%CLAUDE_DIR%" mkdir "%CLAUDE_DIR%"
 
+if not exist "%DATA_DIR%\.env" (
+    echo STORAGE_ENCRYPTION_KEY=4c6752cd4a643f2733143c010166533458573705f4bc508371ba7ee5e2017dfe> "%DATA_DIR%\.env"
+    echo OMNIROUTE_SERVER_HOST=127.0.0.1>> "%DATA_DIR%\.env"
+)
+
 cls
 echo.
 echo ============================================================
