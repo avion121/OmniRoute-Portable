@@ -57,10 +57,12 @@ if (-not (Test-Path $vsSettings)) {
     @"
 {
     "terminal.integrated.env.windows": {
+        "PATH": "`${workspaceFolder}/../bin;`${env:PATH}",
         "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128/v1",
         "ANTHROPIC_API_KEY": "sk-portable-omniroute",
         "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
-        "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude"
+        "CLAUDE_CONFIG_DIR": "`${workspaceFolder}/../data/claude",
+        "OMNIROUTE_DATA_DIR": "`${workspaceFolder}/../data"
     },
     "task.allowAutomaticTasks": "on"
 }
@@ -134,37 +136,24 @@ if (-not (Test-Path $codeExe)) {
 # ------------------------------------------------------------------------------
 # 4. OMNIROUTE & CLAUDE CODE CLI PACKAGES
 # ------------------------------------------------------------------------------
-$omniroutePkg = Join-Path $BIN_DIR "node_modules\omniroute"
+$omnirouteMjs = Join-Path $BIN_DIR "node_modules\omniroute\bin\omniroute.mjs"
 $claudePkg = Join-Path $BIN_DIR "node_modules\@anthropic-ai\claude-code"
 
-if (-not (Test-Path $omniroutePkg) -or -not (Test-Path $claudePkg)) {
+if (-not (Test-Path $omnirouteMjs) -or -not (Test-Path $claudePkg)) {
     Write-Host "  [3/3] Installing OmniRoute and Claude Code CLI packages..." -ForegroundColor Yellow
     Write-Host "        Installing via portable npm (this may take 1-2 minutes)..." -ForegroundColor Cyan
 
-    $npmArgs = @(
-        $npmCli,
-        "install",
-        "-g",
-        "omniroute@latest",
-        "@anthropic-ai/claude-code@latest",
-        "--prefix",
-        $BIN_DIR
-    )
-
-    $p = Start-Process -FilePath $nodeExe -ArgumentList $npmArgs -NoNewWindow -PassThru -Wait
-    if ($p.ExitCode -ne 0) {
+    & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest --prefix "$BIN_DIR"
+    if ($LASTEXITCODE -ne 0) {
         Write-Host "        Retrying with --legacy-peer-deps..." -ForegroundColor Yellow
-        $npmRetryArgs = @(
-            $npmCli,
-            "install",
-            "-g",
-            "omniroute@latest",
-            "@anthropic-ai/claude-code@latest",
-            "--prefix",
-            $BIN_DIR,
-            "--legacy-peer-deps"
-        )
-        $p2 = Start-Process -FilePath $nodeExe -ArgumentList $npmRetryArgs -NoNewWindow -PassThru -Wait
+        & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest --prefix "$BIN_DIR" --legacy-peer-deps
+    }
+
+    # Verify installation
+    if (-not (Test-Path $omnirouteMjs)) {
+        Write-Host "  [ERROR] OmniRoute module was not found at expected path: $omnirouteMjs" -ForegroundColor Red
+        Write-Host "  Please check network connectivity and rerun." -ForegroundColor Yellow
+        exit 1
     }
 
     Write-Host "  [OK] OmniRoute and Claude Code CLI installed successfully." -ForegroundColor Green
