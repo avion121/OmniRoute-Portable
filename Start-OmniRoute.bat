@@ -54,142 +54,29 @@ echo ===========================================================================
 echo              OMNIROUTE PORTABLE AI DEVELOPER DRIVE
 echo ==============================================================================
 echo  Root Directory : %USB_ROOT%
-echo  Status         : Checking prerequisites and dependencies...
+echo  Status         : Validating prerequisites and environment...
 echo ==============================================================================
 echo.
 
 REM ------------------------------------------------------------------------------
-REM 2. ENSURE DIRECTORIES AND CONFIGURATION FILES
+REM 2. RUN BOOTSTRAP ENGINE (DOWNLOAD & SETUP PREREQUISITES IF MISSING)
 REM ------------------------------------------------------------------------------
-if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
-if not exist "%WORKSPACE_DIR%" mkdir "%WORKSPACE_DIR%"
-if not exist "%WORKSPACE_DIR%\.vscode" mkdir "%WORKSPACE_DIR%\.vscode"
-if not exist "%DATA_DIR%" mkdir "%DATA_DIR%"
-if not exist "%HOME_DIR%" mkdir "%HOME_DIR%"
-if not exist "%CLAUDE_DIR%" mkdir "%CLAUDE_DIR%"
-
-REM Ensure data\.env exists with the required storage encryption key
-if not exist "%DATA_DIR%\.env" (
-    if exist "%DATA_DIR%\.env.example" (
-        copy /Y "%DATA_DIR%\.env.example" "%DATA_DIR%\.env" >nul 2>&1
-    ) else (
-        (
-            echo STORAGE_ENCRYPTION_KEY=4c6752cd4a643f2733143c010166533458573705f4bc508371ba7ee5e2017dfe
-            echo OMNIROUTE_SERVER_HOST=127.0.0.1
-        ) > "%DATA_DIR%\.env"
-    )
-    echo  [OK] Environment configuration initialized (.env).
-)
-
-REM Ensure workspace\.vscode\settings.json exists
-if not exist "%WORKSPACE_DIR%\.vscode\settings.json" (
-    (
-        echo {
-        echo     "terminal.integrated.env.windows": {
-        echo         "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128/v1",
-        echo         "ANTHROPIC_API_KEY": "sk-portable-omniroute",
-        echo         "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
-        echo         "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude"
-        echo     },
-        echo     "task.allowAutomaticTasks": "on"
-        echo }
-    ) > "%WORKSPACE_DIR%\.vscode\settings.json"
-)
-
-REM ------------------------------------------------------------------------------
-REM 3. DEPENDENCY CHECK & INSTALLATION: PORTABLE NODE.JS LTS (v24)
-REM ------------------------------------------------------------------------------
-set "NEED_NODE=0"
-if not exist "%BIN_DIR%\node.exe" set "NEED_NODE=1"
-if not exist "%BIN_DIR%\node_modules\npm\bin\npm-cli.js" set "NEED_NODE=1"
-
-if "%NEED_NODE%"=="1" (
-    echo.
-    echo  [1/3] Portable Node.js LTS is missing.
-    echo        Downloading and setting up portable Node.js to drive...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-        "$ProgressPreference = 'SilentlyContinue';" ^
-        "$url = 'https://nodejs.org/dist/v24.21.0/node-v24.21.0-win-x64.zip';" ^
-        "$zip = Join-Path $env:TEMP 'node-portable-v24.zip';" ^
-        "$extract = Join-Path $env:TEMP 'node-extract-v24';" ^
-        "Write-Host '       -> Downloading Node.js v24.21.0 (LTS)...' -ForegroundColor Cyan;" ^
-        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-        "(New-Object System.Net.WebClient).DownloadFile($url, $zip);" ^
-        "Write-Host '       -> Extracting to portable bin folder...' -ForegroundColor Cyan;" ^
-        "if (Test-Path $extract) { Remove-Item $extract -Recurse -Force };" ^
-        "Expand-Archive -Path $zip -DestinationPath $extract -Force;" ^
-        "$inner = Get-ChildItem $extract | Where-Object { $_.PSIsContainer } | Select-Object -First 1;" ^
-        "Get-ChildItem $inner.FullName | Copy-Item -Destination '%BIN_DIR%' -Recurse -Force;" ^
-        "Remove-Item $zip, $extract -Recurse -Force;" ^
-        "Write-Host '       -> Node.js installation successful.' -ForegroundColor Green;"
-    if not exist "%BIN_DIR%\node.exe" (
-        echo.
-        echo  [ERROR] Failed to download or install Node.js. Check your internet connection.
-        pause
-        exit /b 1
-    )
-) else (
-    echo  [OK] Portable Node.js detected: Ready.
-)
-
-REM ------------------------------------------------------------------------------
-REM 4. DEPENDENCY CHECK & INSTALLATION: PORTABLE VS CODE
-REM ------------------------------------------------------------------------------
-if not exist "%VSCODE_DIR%\Code.exe" (
-    echo.
-    echo  [2/3] Portable VS Code is missing.
-    echo        Downloading and setting up VS Code Portable to drive...
-    if not exist "%VSCODE_DIR%" mkdir "%VSCODE_DIR%"
-    powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-        "$ProgressPreference = 'SilentlyContinue';" ^
-        "$url = 'https://update.code.visualstudio.com/latest/win32-x64-archive/stable';" ^
-        "$zip = Join-Path $env:TEMP 'vscode-portable.zip';" ^
-        "Write-Host '       -> Downloading latest VS Code Portable...' -ForegroundColor Cyan;" ^
-        "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-        "(New-Object System.Net.WebClient).DownloadFile($url, $zip);" ^
-        "Write-Host '       -> Extracting to portable vscode folder...' -ForegroundColor Cyan;" ^
-        "Expand-Archive -Path $zip -DestinationPath '%VSCODE_DIR%' -Force;" ^
-        "Remove-Item $zip -Force;" ^
-        "Write-Host '       -> VS Code installation successful.' -ForegroundColor Green;"
-    if not exist "%VSCODE_DIR%\Code.exe" (
-        echo.
-        echo  [ERROR] Failed to download or install VS Code. Check your internet connection.
-        pause
-        exit /b 1
-    )
-) else (
-    echo  [OK] Portable VS Code detected: Ready.
-)
-
-REM ------------------------------------------------------------------------------
-REM 5. DEPENDENCY CHECK & UPDATE: OMNIROUTE & CLAUDE CODE CLI
-REM ------------------------------------------------------------------------------
-set "NEED_NPM_INSTALL=0"
-if not exist "%BIN_DIR%\node_modules\omniroute" set "NEED_NPM_INSTALL=1"
-if not exist "%BIN_DIR%\node_modules\@anthropic-ai\claude-code" set "NEED_NPM_INSTALL=1"
-
-set "NPM_CLI=%BIN_DIR%\node_modules\npm\bin\npm-cli.js"
-
-if "%NEED_NPM_INSTALL%"=="1" (
-    echo.
-    echo  [3/3] Installing latest OmniRoute ^& Claude Code packages...
-    "%BIN_DIR%\node.exe" "%NPM_CLI%" install -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%"
+if exist "%USB_ROOT%\bootstrap.ps1" (
+    powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File "%USB_ROOT%\bootstrap.ps1" -RootPath "%USB_ROOT%"
     if errorlevel 1 (
         echo.
-        echo  [WARNING] Retrying package installation...
-        "%BIN_DIR%\node.exe" "%NPM_CLI%" install -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%" --legacy-peer-deps
+        echo  [ERROR] Setup bootstrap failed. Please check your internet connection.
+        echo.
+        pause
+        exit /b 1
     )
-    echo  [OK] OmniRoute and Claude Code installed successfully.
 ) else (
-    echo  [OK] OmniRoute ^& Claude Code detected: Ready.
-    echo        Checking for package updates in background...
-    start "" /b "%BIN_DIR%\node.exe" "%NPM_CLI%" update -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%" >nul 2>&1
+    echo  [WARNING] bootstrap.ps1 not found. Proceeding with existing binaries...
 )
 
 REM ------------------------------------------------------------------------------
-REM 6. START OMNIROUTE SERVER (BACKGROUND)
+REM 3. START OMNIROUTE SERVER (BACKGROUND)
 REM ------------------------------------------------------------------------------
-echo.
 echo ==============================================================================
 echo  Starting OmniRoute Proxy Server...
 echo ==============================================================================
@@ -222,7 +109,7 @@ if defined OMNI_READY (
 )
 
 REM ------------------------------------------------------------------------------
-REM 7. LAUNCH PORTABLE VS CODE
+REM 4. LAUNCH PORTABLE VS CODE
 REM ------------------------------------------------------------------------------
 echo.
 echo  Starting Portable VS Code...
@@ -235,7 +122,7 @@ start "" "%VSCODE_DIR%\Code.exe" ^
 echo  VS Code Status    : STARTED
 
 REM ------------------------------------------------------------------------------
-REM 8. READY DASHBOARD & INSTRUCTIONS
+REM 5. READY DASHBOARD & INSTRUCTIONS
 REM ------------------------------------------------------------------------------
 cls
 echo ==============================================================================

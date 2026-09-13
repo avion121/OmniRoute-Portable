@@ -53,7 +53,8 @@ Start-OmniRoute.bat
 
 ```
 OmniRoute-Portable/
-├── Start-OmniRoute.bat        # Main 1-click launcher & auto-bootstrapper
+├── Start-OmniRoute.bat        # Main 1-click launcher
+├── bootstrap.ps1              # Automated dependency installer & updater engine
 ├── README.md                  # Documentation
 ├── .gitignore                 # Git ignore configuration
 │
