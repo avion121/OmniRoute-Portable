@@ -29,26 +29,38 @@ Write-Host ""
 # ------------------------------------------------------------------------------
 # 1. DIRECTORY INITIALIZATION
 # ------------------------------------------------------------------------------
-$dirs = @($BIN_DIR, $VSCODE_DIR, $DATA_DIR, $HOME_DIR, $WORKSPACE_DIR, $CLAUDE_DIR, (Join-Path $WORKSPACE_DIR ".vscode"))
+$dirs = @(
+    $BIN_DIR,
+    $VSCODE_DIR,
+    $DATA_DIR,
+    $HOME_DIR,
+    $WORKSPACE_DIR,
+    $CLAUDE_DIR,
+    (Join-Path $WORKSPACE_DIR ".vscode"),
+    (Join-Path $HOME_DIR "Desktop"),
+    (Join-Path $HOME_DIR "Documents"),
+    (Join-Path $HOME_DIR "Downloads"),
+    (Join-Path $HOME_DIR "Pictures"),
+    (Join-Path $HOME_DIR "Music"),
+    (Join-Path $HOME_DIR "Videos")
+)
 foreach ($d in $dirs) {
     if (-not (Test-Path $d)) {
         New-Item -ItemType Directory -Path $d -Force | Out-Null
     }
 }
 
-# Ensure data\.env exists
+# Ensure data\.env exists with a secure unique random key
 $envFile = Join-Path $DATA_DIR ".env"
-$envExample = Join-Path $DATA_DIR ".env.example"
 if (-not (Test-Path $envFile)) {
-    if (Test-Path $envExample) {
-        Copy-Item -Path $envExample -Destination $envFile -Force
-    } else {
-        @"
-STORAGE_ENCRYPTION_KEY=4c6752cd4a643f2733143c010166533458573705f4bc508371ba7ee5e2017dfe
+    $bytes = New-Object byte[] 32
+    [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+    $generatedKey = ($bytes | ForEach-Object { $_.ToString("x2") }) -join ""
+    @"
+STORAGE_ENCRYPTION_KEY=$generatedKey
 OMNIROUTE_SERVER_HOST=127.0.0.1
 "@ | Set-Content -Path $envFile -Encoding UTF8
-    }
-    Write-Host "  [OK] Environment configuration initialized (.env)." -ForegroundColor Green
+    Write-Host "  [OK] Secure environment configuration generated (.env)." -ForegroundColor Green
 }
 
 # Ensure workspace\.vscode\settings.json exists

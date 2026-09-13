@@ -37,6 +37,21 @@ set "HOME=%HOME_DIR%"
 set "HOMEDRIVE=%~d0"
 set "HOMEPATH=\home"
 
+REM Ensure base portable directories exist
+if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
+if not exist "%WORKSPACE_DIR%" mkdir "%WORKSPACE_DIR%"
+if not exist "%DATA_DIR%" mkdir "%DATA_DIR%"
+if not exist "%HOME_DIR%" mkdir "%HOME_DIR%"
+if not exist "%CLAUDE_DIR%" mkdir "%CLAUDE_DIR%"
+
+REM Create portable Windows user profile folders (prevents VS Code 'Desktop is unavailable' dialog error)
+if not exist "%HOME_DIR%\Desktop" mkdir "%HOME_DIR%\Desktop"
+if not exist "%HOME_DIR%\Documents" mkdir "%HOME_DIR%\Documents"
+if not exist "%HOME_DIR%\Downloads" mkdir "%HOME_DIR%\Downloads"
+if not exist "%HOME_DIR%\Pictures" mkdir "%HOME_DIR%\Pictures"
+if not exist "%HOME_DIR%\Music" mkdir "%HOME_DIR%\Music"
+if not exist "%HOME_DIR%\Videos" mkdir "%HOME_DIR%\Videos"
+
 set "OMNIROUTE_DATA_DIR=%DATA_DIR%"
 set "OMNIROUTE_SERVER_HOST=127.0.0.1"
 set "CLAUDE_CONFIG_DIR=%CLAUDE_DIR%"

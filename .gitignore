@@ -8,7 +8,7 @@
 /data/vscode-user-data/
 /data/vscode-extensions/
 
-# Runtime and temp logs
+# Runtime, temporary, and sensitive data
 /data/omniroute.log
 /data/logs/
 /data/call_logs/
@@ -19,29 +19,29 @@
 /data/supervisor/
 /data/server/
 
-# Claude runtime sessions and logs
-/data/claude/backups/
-/data/claude/cache/
-/data/claude/file-history/
-/data/claude/session-env/
-/data/claude/sessions/
-/data/claude/shell-snapshots/
-/data/claude/history.jsonl
-/data/claude/.last-cleanup
-/data/claude/projects/
-/data/claude/plugins/
-/data/claude/.claude.json
-
-# Configuration
-/data/.env
-push_repo.js
-
-# SQLite WAL and shared memory files (ephemeral)
+# SQLite databases & journals (credentials, connection keys, history)
+*.sqlite
 *.sqlite-wal
 *.sqlite-shm
+/data/*.sqlite*
+/home/**/storage.sqlite*
+
+# Claude runtime sessions, caches, history, and pastes
+/data/claude/*
+!/data/claude/settings.json
+
+# Configuration secrets and local scripts
+/data/.env
+*.env
+*.env.local
+push_repo.js
 
 # User home profile directory
 /home/
+
+# Workspace user files (keep .vscode config)
+/workspace/*
+!/workspace/.vscode/
 
 # OS specific files
 Thumbs.db
