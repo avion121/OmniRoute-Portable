@@ -1,0 +1,9 @@
+{
+    "terminal.integrated.env.windows": {
+        "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128/v1",
+        "ANTHROPIC_API_KEY": "sk-portable-omniroute",
+        "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
+        "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude"
+    },
+    "task.allowAutomaticTasks": "on"
+}

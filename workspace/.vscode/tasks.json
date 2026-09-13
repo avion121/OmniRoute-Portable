@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Claude Code",
+            "type": "shell",
+            "command": "claude",
+            "options": {
+                "env": {
+                    "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128/v1",
+                    "ANTHROPIC_API_KEY": "sk-portable-omniroute",
+                    "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
+                    "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

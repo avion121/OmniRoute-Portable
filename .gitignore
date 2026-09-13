@@ -1,0 +1,45 @@
+# Binaries and Node modules
+/bin/node.exe
+/bin/node_modules/
+/bin/*.log
+
+# VS Code Portable
+/vscode/
+/data/vscode-user-data/
+/data/vscode-extensions/
+
+# Runtime and temp logs
+/data/omniroute.log
+/data/logs/
+/data/call_logs/
+/data/cache/
+/data/cloudflared/
+/data/db_backups/
+/data/tailscale/
+/data/supervisor/
+/data/server/
+
+# Claude runtime sessions and logs
+/data/claude/backups/
+/data/claude/cache/
+/data/claude/file-history/
+/data/claude/session-env/
+/data/claude/sessions/
+/data/claude/shell-snapshots/
+/data/claude/history.jsonl
+/data/claude/.last-cleanup
+/data/claude/projects/
+/data/claude/plugins/
+/data/claude/.claude.json
+
+# SQLite WAL and shared memory files (ephemeral)
+*.sqlite-wal
+*.sqlite-shm
+
+# User home profile directory
+/home/
+
+# OS specific files
+Thumbs.db
+Desktop.ini
+.DS_Store
