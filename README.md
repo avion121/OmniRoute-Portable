@@ -45,7 +45,6 @@ Start-OmniRoute.bat
    ```bash
    omniroute launch --model free-stack
    ```
-   *(or simply type `claude`)*
 
 ---
 

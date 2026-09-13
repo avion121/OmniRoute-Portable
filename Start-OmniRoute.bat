@@ -161,8 +161,6 @@ echo   3. Launch Claude Code with free-stack:
 echo.
 echo         omniroute launch --model free-stack
 echo.
-echo      (Or simply type: claude)
-echo.
 echo ==============================================================================
 echo.
 echo  OmniRoute is running in the background.
