@@ -8,11 +8,16 @@ Everything runs completely isolated from your host system — settings, extensio
 
 ## ✨ Features
 
-- **⚡ Zero Configuration / 1-Click Launch**: Clone the repository and double-click `Start-OmniRoute.bat`. The script automatically handles downloading portable components if missing and boots up OmniRoute + VS Code immediately.
+- **⚡ 100% Zero Configuration / 1-Click Launch**: Clone the repository and double-click `Start-OmniRoute.bat`.
+- **🛠️ Self-Checking & Auto-Bootstrapping**: The script automatically checks all prerequisites and dependencies:
+  - If **Portable Node.js LTS** is missing, it downloads and sets it up automatically.
+  - If **Portable VS Code** is missing, it downloads and extracts it to the drive.
+  - If **OmniRoute** or **Claude Code** are missing, it installs them via portable npm.
+  - It automatically checks for and updates packages to the latest versions so you never have outdated model mappings.
 - **🔄 OmniRoute AI Proxy & Router**: Pre-configured with the `free-stack` model combo with intelligent routing and automatic fallback chains across multiple top-tier models.
 - **💻 Claude Code CLI**: Anthropic's interactive agentic coding assistant ready to pair-program directly in your terminal.
 - **📦 100% Portable**: No global Node.js or VS Code installation required on the host computer. Works from any folder or USB drive.
-- **🔒 Isolated Workspace**: User profile, VS Code extensions, user data, and Claude configuration are sandboxed in the local `data/` and `home/` folders.
+- **🔒 Sandboxed & Isolated Workspace**: User profile, VS Code extensions, user data, and Claude configuration are contained in `data/`, `home/`, and `workspace/`.
 
 ---
 
@@ -20,8 +25,8 @@ Everything runs completely isolated from your host system — settings, extensio
 
 ### 1. Clone the Repository
 ```bash
-git clone <YOUR-REPO-URL>
-cd OmniRoute-Portable-With-VS-CODE-TUI_CLAUDE-CODE
+git clone https://github.com/avion121/OmniRoute-Portable.git
+cd OmniRoute-Portable
 ```
 
 ### 2. Run the Launcher
@@ -30,7 +35,7 @@ Double-click:
 Start-OmniRoute.bat
 ```
 
-> **Note on First Run**: If portable binaries (Node.js and VS Code) are not present, `Start-OmniRoute.bat` will automatically download and set them up in ~1-2 minutes. On subsequent runs, it starts instantly in under 2 seconds!
+> **Automated Setup on First Run**: If portable binaries (Node.js and VS Code) are not yet on the drive, `Start-OmniRoute.bat` will automatically download and install everything via CMD/PowerShell in ~1-2 minutes. On subsequent runs, it starts instantly in under 2 seconds!
 
 ### 3. Start Coding with Claude Code
 1. VS Code will open automatically focused on the `workspace/` folder.
@@ -58,7 +63,7 @@ OmniRoute-Portable/
 │   └── npm.cmd                # Portable NPM
 │
 ├── data/                      # Sandboxed application data & configuration
-│   ├── .env                   # Storage encryption key & host config
+│   ├── .env.example           # Storage encryption key & host template
 │   ├── storage.sqlite         # SQLite database with combos, providers, and settings
 │   ├── claude/                # Claude Code configuration directory
 │   ├── launch-claude-omniroute.cmd
@@ -79,7 +84,7 @@ OmniRoute-Portable/
 ## ⚙️ Configuration & Customization
 
 ### OmniRoute Web UI
-When `Start-OmniRoute.bat` is running, OmniRoute web dashboard is accessible at:
+When `Start-OmniRoute.bat` is running, the OmniRoute web dashboard is accessible at:
 - **URL**: [http://127.0.0.1:20128](http://127.0.0.1:20128)
 
 From the dashboard you can:
@@ -87,7 +92,7 @@ From the dashboard you can:
 - Customize the `free-stack` combo or create new custom model combos.
 - Monitor request logs, token usage, and latency.
 
-### Adding Your Own Project
+### Working on Any Project
 To work on your existing code:
 1. Copy your project folder into the `workspace/` directory, or
 2. Use **File -> Open Folder** in VS Code to open your desired project folder.
@@ -99,7 +104,7 @@ To work on your existing code:
 
 - **OmniRoute port conflict (20128)**: Ensure no other instance of OmniRoute or proxy is running on port `20128`.
 - **First-run download issues**: Ensure you have an active internet connection so PowerShell can download portable Node.js and VS Code archives.
-- **Database / Encryption**: The `data/.env` file contains the `STORAGE_ENCRYPTION_KEY` matching the included `data/storage.sqlite` database. Keep both files paired.
+- **Database / Encryption**: The `data/.env` file contains the `STORAGE_ENCRYPTION_KEY` matching the included `data/storage.sqlite` database. The launcher automatically creates `.env` on first launch.
 
 ---
 
