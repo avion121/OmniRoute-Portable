@@ -97,11 +97,11 @@ if not exist "%WORKSPACE_DIR%\.vscode\settings.json" (
 )
 
 REM ------------------------------------------------------------------------------
-REM 3. DEPENDENCY CHECK & INSTALLATION: PORTABLE NODE.JS LTS
+REM 3. DEPENDENCY CHECK & INSTALLATION: PORTABLE NODE.JS LTS (v24)
 REM ------------------------------------------------------------------------------
 set "NEED_NODE=0"
 if not exist "%BIN_DIR%\node.exe" set "NEED_NODE=1"
-if not exist "%BIN_DIR%\npm.cmd" set "NEED_NODE=1"
+if not exist "%BIN_DIR%\node_modules\npm\bin\npm-cli.js" set "NEED_NODE=1"
 
 if "%NEED_NODE%"=="1" (
     echo.
@@ -109,15 +109,17 @@ if "%NEED_NODE%"=="1" (
     echo        Downloading and setting up portable Node.js to drive...
     powershell -NoProfile -ExecutionPolicy Bypass -Command ^
         "$ProgressPreference = 'SilentlyContinue';" ^
-        "$url = 'https://nodejs.org/dist/v20.18.0/node-v20.18.0-win-x64.zip';" ^
-        "$zip = Join-Path $env:TEMP 'node-portable.zip';" ^
-        "$extract = Join-Path $env:TEMP 'node-extract';" ^
-        "Write-Host '       -> Downloading Node.js v20.18.0 (LTS)...' -ForegroundColor Cyan;" ^
+        "$url = 'https://nodejs.org/dist/v24.21.0/node-v24.21.0-win-x64.zip';" ^
+        "$zip = Join-Path $env:TEMP 'node-portable-v24.zip';" ^
+        "$extract = Join-Path $env:TEMP 'node-extract-v24';" ^
+        "Write-Host '       -> Downloading Node.js v24.21.0 (LTS)...' -ForegroundColor Cyan;" ^
         "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
         "(New-Object System.Net.WebClient).DownloadFile($url, $zip);" ^
         "Write-Host '       -> Extracting to portable bin folder...' -ForegroundColor Cyan;" ^
+        "if (Test-Path $extract) { Remove-Item $extract -Recurse -Force };" ^
         "Expand-Archive -Path $zip -DestinationPath $extract -Force;" ^
-        "Get-ChildItem (Join-Path $extract 'node-v20.18.0-win-x64') | Copy-Item -Destination '%BIN_DIR%' -Recurse -Force;" ^
+        "$inner = Get-ChildItem $extract | Where-Object { $_.PSIsContainer } | Select-Object -First 1;" ^
+        "Get-ChildItem $inner.FullName | Copy-Item -Destination '%BIN_DIR%' -Recurse -Force;" ^
         "Remove-Item $zip, $extract -Recurse -Force;" ^
         "Write-Host '       -> Node.js installation successful.' -ForegroundColor Green;"
     if not exist "%BIN_DIR%\node.exe" (
@@ -163,25 +165,25 @@ REM ----------------------------------------------------------------------------
 REM 5. DEPENDENCY CHECK & UPDATE: OMNIROUTE & CLAUDE CODE CLI
 REM ------------------------------------------------------------------------------
 set "NEED_NPM_INSTALL=0"
-where omniroute >nul 2>&1
-if errorlevel 1 set "NEED_NPM_INSTALL=1"
-where claude >nul 2>&1
-if errorlevel 1 set "NEED_NPM_INSTALL=1"
+if not exist "%BIN_DIR%\node_modules\omniroute" set "NEED_NPM_INSTALL=1"
+if not exist "%BIN_DIR%\node_modules\@anthropic-ai\claude-code" set "NEED_NPM_INSTALL=1"
+
+set "NPM_CLI=%BIN_DIR%\node_modules\npm\bin\npm-cli.js"
 
 if "%NEED_NPM_INSTALL%"=="1" (
     echo.
     echo  [3/3] Installing latest OmniRoute ^& Claude Code packages...
-    call "%BIN_DIR%\npm.cmd" install -g omniroute@latest @anthropic-ai/claude-code@latest --prefix "%BIN_DIR%"
+    "%BIN_DIR%\node.exe" "%NPM_CLI%" install -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%"
     if errorlevel 1 (
         echo.
-        echo  [WARNING] Initial npm install encountered an error. Retrying...
-        call "%BIN_DIR%\npm.cmd" install -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%"
+        echo  [WARNING] Retrying package installation...
+        "%BIN_DIR%\node.exe" "%NPM_CLI%" install -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%" --legacy-peer-deps
     )
     echo  [OK] OmniRoute and Claude Code installed successfully.
 ) else (
     echo  [OK] OmniRoute ^& Claude Code detected: Ready.
     echo        Checking for package updates in background...
-    start "" /b "%BIN_DIR%\npm.cmd" update -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%" >nul 2>&1
+    start "" /b "%BIN_DIR%\node.exe" "%NPM_CLI%" update -g omniroute @anthropic-ai/claude-code --prefix "%BIN_DIR%" >nul 2>&1
 )
 
 REM ------------------------------------------------------------------------------
