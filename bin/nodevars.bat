@@ -1,7 +1,7 @@
 @echo off
 
-rem Ensure this Node.js and npm are first in the PATH
-set "PATH=%APPDATA%\npm;%~dp0;%PATH%"
+rem Ensure portable bin directory is in PATH
+set "PATH=%~dp0;%PATH%"
 
 setlocal enabledelayedexpansion
 pushd "%~dp0"
@@ -12,13 +12,10 @@ for /F "usebackq delims=" %%v in (`%print_version%`) do set version=%%v
 
 rem Print message.
 if exist npm.cmd (
-  echo Your environment has been set up for using Node.js !version! and npm.
+  echo Your portable environment has been set up for using Node.js !version! and npm.
 ) else (
-  echo Your environment has been set up for using Node.js !version!.
+  echo Your portable environment has been set up for using Node.js !version!.
 )
 
 popd
 endlocal
-
-rem If we're in the Node.js directory, change to the user's home dir.
-if "%CD%\"=="%~dp0" cd /d "%HOMEDRIVE%%HOMEPATH%"

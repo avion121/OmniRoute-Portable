@@ -11,11 +11,14 @@ REM
 REM Automated Lifecycle:
 REM   1. Validates all prerequisites, directories, and configuration.
 REM   2. Auto-downloads and installs Portable Node.js LTS if missing.
-REM   3. Auto-downloads and installs Portable VS Code if missing.
-REM   4. Auto-installs and updates OmniRoute & Claude Code to the latest versions.
-REM   5. Starts OmniRoute AI proxy server in the background and verifies health.
-REM   6. Launches Portable VS Code pointing to the isolated workspace.
-REM   7. Ready for instant use with: omniroute launch --model free-stack
+REM   3. Auto-downloads and installs Portable Python 3.12 & Pip if missing.
+REM   4. Auto-downloads and installs Portable Git for Windows if missing.
+REM   5. Auto-downloads and installs Portable Hoppscotch Desktop if missing.
+REM   6. Auto-downloads and installs Portable VS Code if missing.
+REM   7. Auto-installs and updates OmniRoute, Claude Code & Hoppscotch CLI.
+REM   8. Starts OmniRoute AI proxy server in the background and verifies health.
+REM   9. Launches Portable VS Code pointing to the isolated workspace.
+REM  10. Ready for instant use with: omniroute launch --model free-stack
 REM
 REM ==============================================================================
 
@@ -26,23 +29,51 @@ set "USB_ROOT=%~dp0"
 if "%USB_ROOT:~-1%"=="\" set "USB_ROOT=%USB_ROOT:~0,-1%"
 
 set "BIN_DIR=%USB_ROOT%\bin"
+set "PYTHON_DIR=%USB_ROOT%\python"
+set "TOOLS_DIR=%USB_ROOT%\tools"
+set "PORTABLE_GIT_DIR=%TOOLS_DIR%\git"
+set "HOPPSCOTCH_DIR=%USB_ROOT%\hoppscotch"
 set "VSCODE_DIR=%USB_ROOT%\vscode"
 set "WORKSPACE_DIR=%USB_ROOT%\workspace"
 set "DATA_DIR=%USB_ROOT%\data"
 set "HOME_DIR=%USB_ROOT%\home"
 set "CLAUDE_DIR=%DATA_DIR%\claude"
+set "TEMP_DIR=%DATA_DIR%\temp"
 
 set "USERPROFILE=%HOME_DIR%"
 set "HOME=%HOME_DIR%"
 set "HOMEDRIVE=%~d0"
 set "HOMEPATH=\home"
+set "APPDATA=%HOME_DIR%\AppData\Roaming"
+set "LOCALAPPDATA=%HOME_DIR%\AppData\Local"
+set "TEMP=%TEMP_DIR%"
+set "TMP=%TEMP_DIR%"
+set "npm_config_cache=%DATA_DIR%\npm-cache"
+set "npm_config_prefix=%BIN_DIR%"
+set "npm_config_userconfig=%HOME_DIR%\.npmrc"
+set "PIP_CACHE_DIR=%DATA_DIR%\pip-cache"
+set "PYTHONNOUSERSITE=1"
+set "PYTHONPYCACHEPREFIX=%DATA_DIR%\pycache"
+set "GIT_CONFIG_NOSYSTEM=1"
+set "GIT_CONFIG_GLOBAL=%HOME_DIR%\.gitconfig"
+set "WEBVIEW2_USER_DATA_FOLDER=%DATA_DIR%\hoppscotch-data"
 
 REM Ensure base portable directories exist
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
+if not exist "%PYTHON_DIR%" mkdir "%PYTHON_DIR%"
+if not exist "%TOOLS_DIR%" mkdir "%TOOLS_DIR%"
+if not exist "%PORTABLE_GIT_DIR%" mkdir "%PORTABLE_GIT_DIR%"
+if not exist "%HOPPSCOTCH_DIR%" mkdir "%HOPPSCOTCH_DIR%"
 if not exist "%WORKSPACE_DIR%" mkdir "%WORKSPACE_DIR%"
 if not exist "%DATA_DIR%" mkdir "%DATA_DIR%"
 if not exist "%HOME_DIR%" mkdir "%HOME_DIR%"
 if not exist "%CLAUDE_DIR%" mkdir "%CLAUDE_DIR%"
+if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
+if not exist "%DATA_DIR%\npm-cache" mkdir "%DATA_DIR%\npm-cache"
+if not exist "%DATA_DIR%\pip-cache" mkdir "%DATA_DIR%\pip-cache"
+if not exist "%DATA_DIR%\pycache" mkdir "%DATA_DIR%\pycache"
+if not exist "%HOME_DIR%\AppData\Roaming" mkdir "%HOME_DIR%\AppData\Roaming"
+if not exist "%HOME_DIR%\AppData\Local" mkdir "%HOME_DIR%\AppData\Local"
 
 REM Create portable Windows user profile folders (prevents VS Code 'Desktop is unavailable' dialog error)
 if not exist "%HOME_DIR%\Desktop" mkdir "%HOME_DIR%\Desktop"
@@ -62,7 +93,7 @@ set "ANTHROPIC_AUTH_TOKEN="
 set "ANTHROPIC_BASE_URL="
 set "ANTHROPIC_MODEL="
 
-set "PATH=%BIN_DIR%;%PATH%"
+set "PATH=%BIN_DIR%;%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PORTABLE_GIT_DIR%\cmd;%PATH%"
 
 cls
 echo ==============================================================================
@@ -99,25 +130,25 @@ echo ===========================================================================
 curl.exe -s http://127.0.0.1:20128/api/monitoring/health >nul 2>&1
 if not errorlevel 1 (
     echo  OmniRoute server is already running on http://127.0.0.1:20128
-    set "OMNI_READY=1"
+    set "OMNIREADY=1"
     goto SERVER_READY
 )
 
 start "" /b omniroute > "%DATA_DIR%\omniroute.log" 2>&1
 
 echo  Waiting for server to become healthy...
-set "OMNI_READY="
+set "OMNIREADY="
 for /L %%A in (1,1,20) do (
     curl.exe -s http://127.0.0.1:20128/api/monitoring/health >nul 2>&1
     if not errorlevel 1 (
-        set "OMNI_READY=1"
+        set "OMNIREADY=1"
         goto SERVER_READY
     )
     timeout /t 1 /nobreak >nul
 )
 
 :SERVER_READY
-if defined OMNI_READY (
+if defined OMNIREADY (
     echo  OmniRoute Status : ACTIVE ^& READY
 ) else (
     echo  OmniRoute Status : STARTING (Log: %DATA_DIR%\omniroute.log)
@@ -147,6 +178,7 @@ echo.
 echo   * OmniRoute Proxy   : http://127.0.0.1:20128
 echo   * Workspace Folder  : %WORKSPACE_DIR%
 echo   * Model Combo       : free-stack (Multi-provider fallback)
+echo   * Hoppscotch App    : %HOPPSCOTCH_DIR%
 echo.
 echo ==============================================================================
 echo                               HOW TO USE
@@ -160,6 +192,10 @@ echo.
 echo   3. Launch Claude Code with free-stack:
 echo.
 echo         omniroute launch --model free-stack
+echo.
+echo   4. Test APIs with Hoppscotch CLI or Desktop:
+echo.
+echo         hopp --help
 echo.
 echo ==============================================================================
 echo.

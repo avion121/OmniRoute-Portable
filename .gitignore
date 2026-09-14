@@ -3,6 +3,16 @@
 /bin/node_modules/
 /bin/*.log
 
+# Portable Python
+/python/
+
+# Portable Tools (Git, etc.)
+/git/
+/tools/
+
+# Portable Hoppscotch
+/hoppscotch/
+
 # VS Code Portable
 /vscode/
 /data/vscode-user-data/
@@ -10,9 +20,16 @@
 
 # Runtime, temporary, and sensitive data
 /data/omniroute.log
+/data/*.timestamp
 /data/logs/
 /data/call_logs/
 /data/cache/
+/data/temp/
+/data/pip-cache/
+/data/pycache/
+/data/npm-cache/
+/data/hoppscotch-data/
+/data/config/
 /data/cloudflared/
 /data/db_backups/
 /data/tailscale/
@@ -42,6 +59,14 @@ push_repo.js
 # Workspace user files (keep .vscode config)
 /workspace/*
 !/workspace/.vscode/
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
 
 # OS specific files
 Thumbs.db

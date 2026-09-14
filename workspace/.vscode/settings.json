@@ -1,11 +1,26 @@
 {
     "terminal.integrated.env.windows": {
-        "PATH": "${workspaceFolder}/../bin;${env:PATH}",
+        "PATH": "${workspaceFolder}/../bin;${workspaceFolder}/../python;${workspaceFolder}/../python/Scripts;${workspaceFolder}/../tools/git/cmd;${env:PATH}",
+        "USERPROFILE": "${workspaceFolder}/../home",
+        "HOME": "${workspaceFolder}/../home",
+        "APPDATA": "${workspaceFolder}/../home/AppData/Roaming",
+        "LOCALAPPDATA": "${workspaceFolder}/../home/AppData/Local",
+        "TEMP": "${workspaceFolder}/../data/temp",
+        "TMP": "${workspaceFolder}/../data/temp",
+        "PYTHONNOUSERSITE": "1",
+        "PIP_CACHE_DIR": "${workspaceFolder}/../data/pip-cache",
+        "PYTHONPYCACHEPREFIX": "${workspaceFolder}/../data/pycache",
+        "npm_config_cache": "${workspaceFolder}/../data/npm-cache",
+        "npm_config_prefix": "${workspaceFolder}/../bin",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": "${workspaceFolder}/../home/.gitconfig",
         "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128/v1",
         "ANTHROPIC_API_KEY": "sk-portable-omniroute",
         "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
         "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude",
         "OMNIROUTE_DATA_DIR": "${workspaceFolder}/../data"
     },
+    "git.path": "${workspaceFolder}/../tools/git/cmd/git.exe",
+    "python.defaultInterpreterPath": "${workspaceFolder}/../python/python.exe",
     "task.allowAutomaticTasks": "on"
 }
