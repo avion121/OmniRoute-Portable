@@ -57,6 +57,9 @@ set "PYTHONPYCACHEPREFIX=%DATA_DIR%\pycache"
 set "GIT_CONFIG_NOSYSTEM=1"
 set "GIT_CONFIG_GLOBAL=%HOME_DIR%\.gitconfig"
 set "WEBVIEW2_USER_DATA_FOLDER=%DATA_DIR%\hoppscotch-data"
+set "DISABLE_AUTO_UPDATER=1"
+set "CLAUDE_AUTO_UPDATER=disabled"
+set "CLAUDE_CODE_DISABLE_UPDATE_CHECK=1"
 
 REM Ensure base portable directories exist
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
@@ -105,13 +108,17 @@ echo ===========================================================================
 echo.
 
 REM ------------------------------------------------------------------------------
-REM 2. RUN BOOTSTRAP ENGINE (DOWNLOAD & SETUP PREREQUISITES IF MISSING)
+REM 2. RUN BOOTSTRAP ENGINE (DYNAMIC AUTO-UPDATE & FULL SYSTEM VERIFICATION)
 REM ------------------------------------------------------------------------------
 if exist "%USB_ROOT%\bootstrap.ps1" (
     powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File "%USB_ROOT%\bootstrap.ps1" -RootPath "%USB_ROOT%"
     if errorlevel 1 (
         echo.
-        echo  [ERROR] Setup bootstrap failed. Please check your internet connection.
+        echo ==============================================================================
+        echo  [ERROR] Component update or system integrity verification failed.
+        echo  No background services or applications have been started.
+        echo  Please inspect the log messages above and try again.
+        echo ==============================================================================
         echo.
         pause
         exit /b 1
@@ -121,7 +128,7 @@ if exist "%USB_ROOT%\bootstrap.ps1" (
 )
 
 REM ------------------------------------------------------------------------------
-REM 3. START OMNIROUTE SERVER (BACKGROUND)
+REM 3. START OMNIROUTE SERVER (BACKGROUND) - ONLY AFTER VERIFICATION PASSES
 REM ------------------------------------------------------------------------------
 echo ==============================================================================
 echo  Starting OmniRoute Proxy Server...
@@ -148,14 +155,20 @@ for /L %%A in (1,1,20) do (
 )
 
 :SERVER_READY
-if defined OMNIREADY (
-    echo  OmniRoute Status : ACTIVE ^& READY
-) else (
-    echo  OmniRoute Status : STARTING (Log: %DATA_DIR%\omniroute.log)
+if not defined OMNIREADY (
+    echo.
+    echo ==============================================================================
+    echo  [ERROR] OmniRoute proxy server failed to respond on http://127.0.0.1:20128
+    echo  VS Code startup aborted. Check log file: %DATA_DIR%\omniroute.log
+    echo ==============================================================================
+    echo.
+    pause
+    exit /b 1
 )
+echo  OmniRoute Status : ACTIVE ^& READY
 
 REM ------------------------------------------------------------------------------
-REM 4. LAUNCH PORTABLE VS CODE
+REM 4. LAUNCH PORTABLE VS CODE - ONLY AFTER SERVER IS HEALTHY
 REM ------------------------------------------------------------------------------
 echo.
 echo  Starting Portable VS Code...

@@ -1,4 +1,4 @@
-{
+﻿{
     "terminal.integrated.env.windows": {
         "PATH": "${workspaceFolder}/../bin;${workspaceFolder}/../python;${workspaceFolder}/../python/Scripts;${workspaceFolder}/../tools/git/cmd;${env:PATH}",
         "USERPROFILE": "${workspaceFolder}/../home",
@@ -18,9 +18,17 @@
         "ANTHROPIC_API_KEY": "sk-portable-omniroute",
         "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
         "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude",
-        "OMNIROUTE_DATA_DIR": "${workspaceFolder}/../data"
+        "OMNIROUTE_DATA_DIR": "${workspaceFolder}/../data",
+        "DISABLE_AUTO_UPDATER": "1",
+        "CLAUDE_AUTO_UPDATER": "disabled",
+        "CLAUDE_CODE_DISABLE_UPDATE_CHECK": "1"
     },
     "git.path": "${workspaceFolder}/../tools/git/cmd/git.exe",
     "python.defaultInterpreterPath": "${workspaceFolder}/../python/python.exe",
-    "task.allowAutomaticTasks": "on"
+    "task.allowAutomaticTasks": "on",
+    "update.mode": "none",
+    "update.showReleaseNotes": false,
+    "security.workspace.trust.enabled": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "security.workspace.trust.startupPrompt": "never"
 }
