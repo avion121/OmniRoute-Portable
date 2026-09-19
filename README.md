@@ -9,20 +9,31 @@ Everything runs completely isolated from your host system — settings, extensio
 ## ✨ Features
 
 - **⚡ 100% Zero Configuration / 1-Click Launch**: Clone the repository and double-click `Start-OmniRoute.bat`.
-- **🔄 Always Up-to-Date**: Automatically checks and updates packages (`omniroute@latest`, `@anthropic-ai/claude-code@latest`, `@hoppscotch/cli@latest`, and `pip`) on startup (with 24-hour smart cadence) or manually via `Update-All-Components.bat`.
-- **🛠️ Self-Checking & Auto-Bootstrapping Engine**: The script automatically checks all prerequisites and dependencies:
-  - If **Portable Node.js LTS** is missing, it downloads and sets it up automatically.
-  - If **Portable Python 3.12 & Pip** are missing, it downloads embeddable Python, enables `site-packages`, and bootstraps `pip` automatically.
-  - If **Portable Git (MinGit x64)** is missing, it downloads and extracts Git for Windows automatically.
-  - If **Portable Hoppscotch Desktop** is missing, it downloads the standalone desktop app automatically.
-  - If **Portable VS Code** is missing, it downloads and extracts it to the drive.
-  - If **OmniRoute**, **Claude Code**, or **Hoppscotch CLI** are missing, it installs them via portable npm.
-- **🔄 OmniRoute AI Proxy & Router**: Pre-configured with the `free-stack` model combo with intelligent routing and automatic fallback chains across multiple top-tier models.
-- **💻 Claude Code CLI**: Anthropic's interactive agentic coding assistant ready to pair-program directly in your terminal.
+- **🛡️ Strict 8-Point Pre-Launch Integrity Verification**: Before any background services or VS Code are started, a strict integrity suite actively validates the health of all 8 subsystems:
+  1. `Node.js LTS & npm` runtime integrity
+  2. `Python 3.12+ & Pip` environment with activated `Lib/site-packages`
+  3. `Git for Windows (MinGit)` binary & global configuration
+  4. `Hoppscotch Desktop` application binary
+  5. `Portable VS Code` IDE executable & portable user profile
+  6. `OmniRoute Engine & CLI` proxy router
+  7. `Claude Code CLI` agentic developer assistant
+  8. `Hoppscotch CLI` API test runner
+  9. `Storage Encryption & Sandbox` isolation configuration
+- **🔒 Gated Startup Protection**: If any subsystem fails the verification check or auto-update, the launch process halts immediately with a clear diagnostics report — zero background processes or IDE windows are spawned until everything is 100% verified.
+- **🔄 Dynamic Auto-Update Engine**: Automatically queries official APIs on every launch to check for and install the latest releases:
+  - **Node.js LTS** (via `nodejs.org` release index)
+  - **Python & Pip** (via `python.org` & `pypa.io`)
+  - **Git for Windows** (via GitHub releases API)
+  - **Hoppscotch Desktop** (via GitHub releases API)
+  - **Portable VS Code** (via Microsoft stable release API)
+  - **OmniRoute, Claude Code CLI, & Hoppscotch CLI** (via npm registry `@latest`)
+- **🔇 Prompt-Free & Uninterrupted**: Background auto-updater prompts and telemetry popups are silenced (`DISABLE_AUTO_UPDATER=1`, workspace trust disabled) for a distraction-free experience.
+- **🔄 OmniRoute AI Proxy & Router**: Pre-configured with the `free-stack` model combo with intelligent routing and automatic fallback chains across 30 free providers and 298 models.
+- **💻 Claude Code CLI**: Anthropic's interactive agentic coding assistant ready to pair-program directly in your terminal with zero login prompts or token friction.
 - **🎯 Hoppscotch API Ecosystem**: Test REST, GraphQL, and WebSocket endpoints via the **Hoppscotch Desktop App** or run automated collections with the `hopp` CLI.
 - **🐍 Full Python & Git Toolchain**: Run Python scripts, install Python libraries via `pip`, and execute `git` version control commands out of the box.
 - **📦 100% Portable**: No global Node.js, Python, Git, Hoppscotch, or VS Code installation required on the host computer. Works from any folder or USB drive.
-- **🔒 Sandboxed & Isolated Workspace**: User profile, VS Code extensions, user data, and Claude configuration are contained in `data/`, `home/`, and `workspace/`.
+- **🔒 Sandboxed & Isolated Workspace**: User profile, VS Code extensions, user data, and Claude configuration are strictly isolated in `data/`, `home/`, and `workspace/`.
 
 ---
 
