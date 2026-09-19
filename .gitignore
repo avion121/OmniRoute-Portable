@@ -2,6 +2,9 @@
 /bin/node.exe
 /bin/node_modules/
 /bin/*.log
+/bin/*.exe
+/bin/skills*
+/bin/add-skill*
 
 # Portable Python
 /python/
@@ -56,9 +59,10 @@ push_repo.js
 # User home profile directory
 /home/
 
-# Workspace user files (keep .vscode config)
+# Workspace user files (keep .vscode config & CLAUDE.md)
 /workspace/*
 !/workspace/.vscode/
+!/workspace/CLAUDE.md
 
 # Python cache & virtual environments
 __pycache__/

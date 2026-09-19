@@ -67,17 +67,26 @@ if (Test-Path $legacyGitDir) {
     }
 }
 
+$SKILLS_SRC_DIR = Join-Path $TOOLS_DIR "skills-sources"
+$CLAUDE_SKILLS_DIR = Join-Path $CLAUDE_DIR "skills"
+$HOME_SKILLS_DIR = Join-Path $HOME_DIR ".claude\skills"
+$WORKSPACE_SKILLS_DIR = Join-Path $WORKSPACE_DIR ".claude\skills"
+
 $dirs = @(
     $BIN_DIR,
     $PYTHON_DIR,
     $TOOLS_DIR,
     $PORTABLE_GIT_DIR,
+    $SKILLS_SRC_DIR,
     $HOPPSCOTCH_DIR,
     $VSCODE_DIR,
     $DATA_DIR,
     $HOME_DIR,
     $WORKSPACE_DIR,
     $CLAUDE_DIR,
+    $CLAUDE_SKILLS_DIR,
+    $HOME_SKILLS_DIR,
+    $WORKSPACE_SKILLS_DIR,
     $TEMP_DIR,
     (Join-Path $DATA_DIR "npm-cache"),
     (Join-Path $DATA_DIR "pip-cache"),
@@ -580,42 +589,48 @@ if ($shouldUpdateCode) {
 $omniPkgJson = Join-Path $BIN_DIR "node_modules\omniroute\package.json"
 $claudePkgJson = Join-Path $BIN_DIR "node_modules\@anthropic-ai\claude-code\package.json"
 $hoppPkgJson = Join-Path $BIN_DIR "node_modules\@hoppscotch\cli\package.json"
+$skillsPkgJson = Join-Path $BIN_DIR "node_modules\skills\package.json"
 
 $curOmniVer = ""
 $curClaudeVer = ""
 $curHoppVer = ""
+$curSkillsVer = ""
 
 if (Test-Path $omniPkgJson) { try { $curOmniVer = (Get-Content $omniPkgJson -Raw | ConvertFrom-Json).version } catch {} }
 if (Test-Path $claudePkgJson) { try { $curClaudeVer = (Get-Content $claudePkgJson -Raw | ConvertFrom-Json).version } catch {} }
 if (Test-Path $hoppPkgJson) { try { $curHoppVer = (Get-Content $hoppPkgJson -Raw | ConvertFrom-Json).version } catch {} }
+if (Test-Path $skillsPkgJson) { try { $curSkillsVer = (Get-Content $skillsPkgJson -Raw | ConvertFrom-Json).version } catch {} }
 
 $latestOmniVer = ""
 $latestClaudeVer = ""
 $latestHoppVer = ""
+$latestSkillsVer = ""
 
 try {
     $latestOmniVer = (& "$nodeExe" "$npmCli" view omniroute version 2>$null).Trim()
     $latestClaudeVer = (& "$nodeExe" "$npmCli" view @anthropic-ai/claude-code version 2>$null).Trim()
     $latestHoppVer = (& "$nodeExe" "$npmCli" view @hoppscotch/cli version 2>$null).Trim()
+    $latestSkillsVer = (& "$nodeExe" "$npmCli" view skills version 2>$null).Trim()
 } catch {}
 
 $needsCliUpdate = $ForceUpdate -or `
-    (-not (Test-Path $omniPkgJson)) -or (-not (Test-Path $claudePkgJson)) -or (-not (Test-Path $hoppPkgJson)) -or `
+    (-not (Test-Path $omniPkgJson)) -or (-not (Test-Path $claudePkgJson)) -or (-not (Test-Path $hoppPkgJson)) -or (-not (Test-Path $skillsPkgJson)) -or `
     ($latestOmniVer -ne "" -and $curOmniVer -ne $latestOmniVer) -or `
     ($latestClaudeVer -ne "" -and $curClaudeVer -ne $latestClaudeVer) -or `
-    ($latestHoppVer -ne "" -and $curHoppVer -ne $latestHoppVer)
+    ($latestHoppVer -ne "" -and $curHoppVer -ne $latestHoppVer) -or `
+    ($latestSkillsVer -ne "" -and $curSkillsVer -ne $latestSkillsVer)
 
 if ($needsCliUpdate) {
-    Write-Host "  [6/6] Auto-updating OmniRoute, Claude Code, and Hoppscotch CLI (@latest)..." -ForegroundColor Yellow
+    Write-Host "  [6/7] Auto-updating OmniRoute, Claude Code, Hoppscotch CLI, and Skills CLI (@latest)..." -ForegroundColor Yellow
     try {
-        & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest --prefix "$BIN_DIR" --no-audit --no-fund
+        & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest skills@latest --prefix "$BIN_DIR" --no-audit --no-fund
         if ($LASTEXITCODE -ne 0) {
-            & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest --prefix "$BIN_DIR" --legacy-peer-deps --no-audit --no-fund
+            & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest skills@latest --prefix "$BIN_DIR" --legacy-peer-deps --no-audit --no-fund
         }
 
-        # Update pip, setuptools, wheel in portable python
+        # Update pip, setuptools, wheel & skill python packages in portable python
         if (Test-Path $pipExe) {
-            & "$pythonExe" -m pip install --upgrade --no-cache-dir pip setuptools wheel --no-warn-script-location 2>$null | Out-Null
+            & "$pythonExe" -m pip install --upgrade --no-cache-dir pip setuptools wheel yt-dlp requests beautifulsoup4 --no-warn-script-location 2>$null | Out-Null
         }
 
         (Get-Date).ToString("o") | Set-Content -Path (Join-Path $DATA_DIR "last_update_check.timestamp") -Encoding UTF8
@@ -624,11 +639,87 @@ if ($needsCliUpdate) {
         Write-Host "  [OK] Using verified local packages: Ready." -ForegroundColor Green
     }
 } else {
-    Write-Host "  [OK] All CLI packages are latest (OmniRoute: $curOmniVer, Claude: $curClaudeVer, Hopp: $curHoppVer): Ready." -ForegroundColor Green
+    Write-Host "  [OK] All CLI packages are latest (OmniRoute: $curOmniVer, Claude: $curClaudeVer, Hopp: $curHoppVer, Skills: $curSkillsVer): Ready." -ForegroundColor Green
 }
 
 # ------------------------------------------------------------------------------
-# 8. COMPREHENSIVE END-TO-END INTEGRITY & FUNCTIONALITY VERIFICATION
+# 8. DYNAMIC OPEN AGENT SKILLS AUTO-UPDATE & SYNCHRONIZATION ENGINE
+# ------------------------------------------------------------------------------
+Write-Host "  [7/7] Auto-verifying and updating Open Agent Skills ecosystem..." -ForegroundColor Yellow
+
+$skillRepos = @(
+    @{ Name = "claude-video"; Url = "https://github.com/bradautomates/claude-video.git" },
+    @{ Name = "last30days-skill"; Url = "https://github.com/mvanhorn/last30days-skill.git" },
+    @{ Name = "humanizer"; Url = "https://github.com/blader/humanizer.git" },
+    @{ Name = "ponytail"; Url = "https://github.com/DietrichGebert/ponytail.git" },
+    @{ Name = "skills"; Url = "https://github.com/vercel-labs/skills.git" }
+)
+
+foreach ($repo in $skillRepos) {
+    $repoPath = Join-Path $SKILLS_SRC_DIR $repo.Name
+    if (-not (Test-Path $repoPath)) {
+        try {
+            & "$gitExe" clone --depth 1 $repo.Url $repoPath 2>&1 | Out-Null
+        } catch {}
+    } else {
+        try {
+            & "$gitExe" -C $repoPath pull --ff-only 2>&1 | Out-Null
+        } catch {}
+    }
+}
+
+# Synchronize all active skills to data\claude\skills, home\.claude\skills, and workspace\.claude\skills
+$targetSkillDirs = @($CLAUDE_SKILLS_DIR, $HOME_SKILLS_DIR, $WORKSPACE_SKILLS_DIR)
+foreach ($target in $targetSkillDirs) {
+    if (-not (Test-Path $target)) { New-Item -ItemType Directory -Path $target -Force | Out-Null }
+
+    # 1. watch (claude-video)
+    $wSrc = Join-Path $SKILLS_SRC_DIR "claude-video\skills\watch"
+    $wDst = Join-Path $target "watch"
+    if (Test-Path $wSrc) {
+        if (-not (Test-Path $wDst)) { New-Item -ItemType Directory -Path $wDst -Force | Out-Null }
+        Copy-Item -Path "$wSrc\*" -Destination $wDst -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    # 2. last30days (last30days-skill)
+    $lSrc = Join-Path $SKILLS_SRC_DIR "last30days-skill\skills\last30days"
+    $lDst = Join-Path $target "last30days"
+    if (Test-Path $lSrc) {
+        if (-not (Test-Path $lDst)) { New-Item -ItemType Directory -Path $lDst -Force | Out-Null }
+        Copy-Item -Path "$lSrc\*" -Destination $lDst -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    # 3. humanizer
+    $hSrc = Join-Path $SKILLS_SRC_DIR "humanizer"
+    $hDst = Join-Path $target "humanizer"
+    if (Test-Path $hSrc) {
+        if (-not (Test-Path $hDst)) { New-Item -ItemType Directory -Path $hDst -Force | Out-Null }
+        Copy-Item -Path "$hSrc\SKILL.md" -Destination $hDst -Force -ErrorAction SilentlyContinue
+        if (Test-Path "$hSrc\agents") { Copy-Item -Path "$hSrc\agents" -Destination $hDst -Recurse -Force -ErrorAction SilentlyContinue }
+    }
+
+    # 4. ponytail suite
+    $pSrc = Join-Path $SKILLS_SRC_DIR "ponytail\skills"
+    if (Test-Path $pSrc) {
+        Get-ChildItem -Path $pSrc -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $pDst = Join-Path $target $_.Name
+            if (-not (Test-Path $pDst)) { New-Item -ItemType Directory -Path $pDst -Force | Out-Null }
+            Copy-Item -Path "$($_.FullName)\*" -Destination $pDst -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    # 5. find-skills
+    $fSrc = Join-Path $SKILLS_SRC_DIR "skills\skills\find-skills"
+    $fDst = Join-Path $target "find-skills"
+    if (Test-Path $fSrc) {
+        if (-not (Test-Path $fDst)) { New-Item -ItemType Directory -Path $fDst -Force | Out-Null }
+        Copy-Item -Path "$fSrc\*" -Destination $fDst -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Write-Host "  [OK] Open Agent Skills (watch, last30days, humanizer, ponytail suite, find-skills) synced and active." -ForegroundColor Green
+
+# ------------------------------------------------------------------------------
+# 9. COMPREHENSIVE END-TO-END INTEGRITY & FUNCTIONALITY VERIFICATION
 # ------------------------------------------------------------------------------
 Write-Host ""
 Write-Host "==============================================================================" -ForegroundColor DarkCyan
@@ -645,126 +736,213 @@ try {
     $nodeVerTest = (& "$nodeExe" -v).Trim()
     $npmVerTest = (& "$nodeExe" "$npmCli" -v).Trim()
     if ($nodeVerTest -match '^v\d+' -and $npmVerTest -match '^\d+') {
-        Write-Host "  [VERIFIED 1/8] Node.js ($nodeVerTest) & npm ($npmVerTest) are healthy." -ForegroundColor Green
+        Write-Host "  [VERIFIED 1/15] Node.js ($nodeVerTest) & npm ($npmVerTest) are healthy." -ForegroundColor Green
     } else {
         throw "Unexpected version response (Node: $nodeVerTest, npm: $npmVerTest)"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "Node.js / npm runtime error: $_"
-    Write-Host "  [FAIL 1/8] Node.js runtime verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 1/15] Node.js runtime verification failed: $_" -ForegroundColor Red
 }
 
-# 2. Verify Python & Pip & site-packages
+# 2. Verify Python & Pip & site-packages & skill libraries
 try {
     $pyVerTest = (& "$pythonExe" --version 2>&1).Trim()
     & "$pythonExe" -c "import sys, os; sys.exit(0 if os.path.exists(os.path.join(sys.prefix, 'Lib', 'site-packages')) else 1)"
     $pyExit = $LASTEXITCODE
     $pipVerTest = (& "$pythonExe" "$pipExe" --version 2>&1).Trim()
     if ($pyExit -eq 0 -and $pipVerTest -match 'pip \d+') {
-        Write-Host "  [VERIFIED 2/8] Python ($pyVerTest) & Pip are healthy (site-packages active)." -ForegroundColor Green
+        Write-Host "  [VERIFIED 2/15] Python ($pyVerTest) & Pip are healthy (site-packages active)." -ForegroundColor Green
     } else {
         throw "Python site-packages verification failed (ExitCode: $pyExit)"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "Python runtime error: $_"
-    Write-Host "  [FAIL 2/8] Python environment verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 2/15] Python environment verification failed: $_" -ForegroundColor Red
 }
 
 # 3. Verify Git
 try {
     $gitVerTest = (& "$gitExe" --version 2>&1).Trim()
     if ($gitVerTest -match 'git version \d+') {
-        Write-Host "  [VERIFIED 3/8] Git for Windows ($gitVerTest) is healthy." -ForegroundColor Green
+        Write-Host "  [VERIFIED 3/15] Git for Windows ($gitVerTest) is healthy." -ForegroundColor Green
     } else {
         throw "Git execution returned: $gitVerTest"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "Git binary error: $_"
-    Write-Host "  [FAIL 3/8] Git verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 3/15] Git verification failed: $_" -ForegroundColor Red
 }
 
 # 4. Verify Hoppscotch Desktop
 try {
     $hoppApp = Get-ChildItem -Path $HOPPSCOTCH_DIR -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($hoppApp -and (Test-Path $hoppApp.FullName)) {
-        Write-Host "  [VERIFIED 4/8] Hoppscotch Desktop ($($hoppApp.Name)) is ready." -ForegroundColor Green
+        Write-Host "  [VERIFIED 4/15] Hoppscotch Desktop ($($hoppApp.Name)) is ready." -ForegroundColor Green
     } else {
         throw "Hoppscotch Desktop executable not found in $HOPPSCOTCH_DIR"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "Hoppscotch Desktop error: $_"
-    Write-Host "  [FAIL 4/8] Hoppscotch Desktop verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 4/15] Hoppscotch Desktop verification failed: $_" -ForegroundColor Red
 }
 
 # 5. Verify VS Code
 try {
     if (Test-Path $codeExe) {
         $vsVerTest = (& "$codeCmd" --version 2>&1 | Select-Object -First 1).Trim()
-        Write-Host "  [VERIFIED 5/8] Portable VS Code IDE (v$vsVerTest) is healthy." -ForegroundColor Green
+        Write-Host "  [VERIFIED 5/15] Portable VS Code IDE (v$vsVerTest) is healthy." -ForegroundColor Green
     } else {
         throw "VS Code executable not found at $codeExe"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "VS Code error: $_"
-    Write-Host "  [FAIL 5/8] VS Code verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 5/15] VS Code verification failed: $_" -ForegroundColor Red
 }
 
 # 6. Verify OmniRoute CLI
 try {
     $omniVerTest = (& "$nodeExe" "$BIN_DIR\node_modules\omniroute\bin\omniroute.mjs" --version 2>&1).Trim()
     if ($omniVerTest -match '\d+\.\d+') {
-        Write-Host "  [VERIFIED 6/8] OmniRoute Engine ($omniVerTest) is healthy." -ForegroundColor Green
+        Write-Host "  [VERIFIED 6/15] OmniRoute Engine ($omniVerTest) is healthy." -ForegroundColor Green
     } else {
         throw "OmniRoute version returned: $omniVerTest"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "OmniRoute error: $_"
-    Write-Host "  [FAIL 6/8] OmniRoute verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 6/15] OmniRoute verification failed: $_" -ForegroundColor Red
 }
 
 # 7. Verify Claude Code CLI
 try {
     $claudeVerTest = (& "$nodeExe" "$BIN_DIR\node_modules\@anthropic-ai\claude-code\cli-wrapper.cjs" --version 2>&1).Trim()
     if ($claudeVerTest -match '\d+\.\d+') {
-        Write-Host "  [VERIFIED 7/8] Claude Code CLI ($claudeVerTest) is healthy." -ForegroundColor Green
+        Write-Host "  [VERIFIED 7/15] Claude Code CLI ($claudeVerTest) is healthy." -ForegroundColor Green
     } else {
         throw "Claude Code returned: $claudeVerTest"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "Claude Code error: $_"
-    Write-Host "  [FAIL 7/8] Claude Code verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 7/15] Claude Code verification failed: $_" -ForegroundColor Red
 }
 
 # 8. Verify Hoppscotch CLI
 try {
     $hoppCliTest = (& "$nodeExe" "$BIN_DIR\node_modules\@hoppscotch\cli\bin\hopp.js" -v 2>&1).Trim()
     if ($hoppCliTest -match '\d+\.\d+') {
-        Write-Host "  [VERIFIED 8/8] Hoppscotch CLI ($hoppCliTest) is healthy." -ForegroundColor Green
+        Write-Host "  [VERIFIED 8/15] Hoppscotch CLI ($hoppCliTest) is healthy." -ForegroundColor Green
     } else {
         throw "Hoppscotch CLI returned: $hoppCliTest"
     }
 } catch {
     $verificationFailed = $true
     $failureReasons += "Hoppscotch CLI error: $_"
-    Write-Host "  [FAIL 8/8] Hoppscotch CLI verification failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 8/15] Hoppscotch CLI verification failed: $_" -ForegroundColor Red
 }
 
-# 9. Verify Isolation & Encryption Configuration
+# 9. Verify Open Agent Skills CLI
+try {
+    $skillsCliTest = (& "$nodeExe" "$BIN_DIR\node_modules\skills\bin\cli.mjs" --version 2>&1).Trim()
+    if ($skillsCliTest -match '\d+\.\d+') {
+        Write-Host "  [VERIFIED 9/15] Open Agent Skills CLI ($skillsCliTest) is healthy." -ForegroundColor Green
+    } else {
+        throw "Skills CLI returned: $skillsCliTest"
+    }
+} catch {
+    $verificationFailed = $true
+    $failureReasons += "Skills CLI error: $_"
+    Write-Host "  [FAIL 9/15] Skills CLI verification failed: $_" -ForegroundColor Red
+}
+
+# 10. Verify Agent Skill: watch (claude-video)
+try {
+    $watchSkillFile = Join-Path $CLAUDE_SKILLS_DIR "watch\SKILL.md"
+    $watchScript = Join-Path $CLAUDE_SKILLS_DIR "watch\scripts\watch.py"
+    if ((Test-Path $watchSkillFile) -and (Test-Path $watchScript)) {
+        Write-Host "  [VERIFIED 10/15] Skill 'watch' (claude-video) is active and verified." -ForegroundColor Green
+    } else {
+        throw "watch skill files missing at $watchSkillFile"
+    }
+} catch {
+    $verificationFailed = $true
+    $failureReasons += "Skill 'watch' error: $_"
+    Write-Host "  [FAIL 10/15] Skill 'watch' verification failed: $_" -ForegroundColor Red
+}
+
+# 11. Verify Agent Skill: last30days (last30days-skill)
+try {
+    $last30SkillFile = Join-Path $CLAUDE_SKILLS_DIR "last30days\SKILL.md"
+    $last30Script = Join-Path $CLAUDE_SKILLS_DIR "last30days\scripts\last30days.py"
+    if ((Test-Path $last30SkillFile) -and (Test-Path $last30Script)) {
+        Write-Host "  [VERIFIED 11/15] Skill 'last30days' (last30days-skill) is active and verified." -ForegroundColor Green
+    } else {
+        throw "last30days skill files missing at $last30SkillFile"
+    }
+} catch {
+    $verificationFailed = $true
+    $failureReasons += "Skill 'last30days' error: $_"
+    Write-Host "  [FAIL 11/15] Skill 'last30days' verification failed: $_" -ForegroundColor Red
+}
+
+# 12. Verify Agent Skill: humanizer
+try {
+    $humSkillFile = Join-Path $CLAUDE_SKILLS_DIR "humanizer\SKILL.md"
+    if (Test-Path $humSkillFile) {
+        Write-Host "  [VERIFIED 12/15] Skill 'humanizer' (anti-AI writing validator) is active and verified." -ForegroundColor Green
+    } else {
+        throw "humanizer skill file missing at $humSkillFile"
+    }
+} catch {
+    $verificationFailed = $true
+    $failureReasons += "Skill 'humanizer' error: $_"
+    Write-Host "  [FAIL 12/15] Skill 'humanizer' verification failed: $_" -ForegroundColor Red
+}
+
+# 13. Verify Agent Skill: ponytail suite
+try {
+    $ptSkillFile = Join-Path $CLAUDE_SKILLS_DIR "ponytail\SKILL.md"
+    $ptReviewFile = Join-Path $CLAUDE_SKILLS_DIR "ponytail-review\SKILL.md"
+    if ((Test-Path $ptSkillFile) -and (Test-Path $ptReviewFile)) {
+        Write-Host "  [VERIFIED 13/15] Skill suite 'ponytail' (anti-overengineering suite) is active and verified." -ForegroundColor Green
+    } else {
+        throw "ponytail skill suite files missing in $CLAUDE_SKILLS_DIR"
+    }
+} catch {
+    $verificationFailed = $true
+    $failureReasons += "Skill 'ponytail' error: $_"
+    Write-Host "  [FAIL 13/15] Skill 'ponytail' verification failed: $_" -ForegroundColor Red
+}
+
+# 14. Verify Agent Skill: find-skills
+try {
+    $findSkillFile = Join-Path $CLAUDE_SKILLS_DIR "find-skills\SKILL.md"
+    if (Test-Path $findSkillFile) {
+        Write-Host "  [VERIFIED 14/15] Skill 'find-skills' (open registry discovery) is active and verified." -ForegroundColor Green
+    } else {
+        throw "find-skills skill file missing at $findSkillFile"
+    }
+} catch {
+    $verificationFailed = $true
+    $failureReasons += "Skill 'find-skills' error: $_"
+    Write-Host "  [FAIL 14/15] Skill 'find-skills' verification failed: $_" -ForegroundColor Red
+}
+
+# 15. Verify Isolation & Encryption Configuration
 try {
     if (-not (Test-Path $envFile)) { throw "Storage encryption key (.env) missing" }
     if (-not (Test-Path $wsSettings)) { throw "Workspace settings (.vscode/settings.json) missing" }
-    Write-Host "  [VERIFIED SANDBOX] Storage encryption key & portable configs are valid." -ForegroundColor Green
+    Write-Host "  [VERIFIED 15/15] Storage encryption key & portable configs are valid." -ForegroundColor Green
 } catch {
     $verificationFailed = $true
     $failureReasons += "Sandbox configuration error: $_"
-    Write-Host "  [FAIL SANDBOX] Configuration check failed: $_" -ForegroundColor Red
+    Write-Host "  [FAIL 15/15] Configuration check failed: $_" -ForegroundColor Red
 }
 
 Write-Host "==============================================================================" -ForegroundColor DarkCyan

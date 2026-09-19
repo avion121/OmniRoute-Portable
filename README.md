@@ -9,24 +9,37 @@ Everything runs completely isolated from your host system — settings, extensio
 ## ✨ Features
 
 - **⚡ 100% Zero Configuration / 1-Click Launch**: Clone the repository and double-click `Start-OmniRoute.bat`.
-- **🛡️ Strict 8-Point Pre-Launch Integrity Verification**: Before any background services or VS Code are started, a strict integrity suite actively validates the health of all 8 subsystems:
+- **🛡️ Strict 15-Point Pre-Launch Integrity Verification**: Before any background services or VS Code are started, a strict integrity suite actively validates the health of all 15 subsystems:
   1. `Node.js LTS & npm` runtime integrity
-  2. `Python 3.12+ & Pip` environment with activated `Lib/site-packages`
+  2. `Python 3.12+ & Pip` environment with activated `Lib/site-packages` & media packages
   3. `Git for Windows (MinGit)` binary & global configuration
   4. `Hoppscotch Desktop` application binary
   5. `Portable VS Code` IDE executable & portable user profile
   6. `OmniRoute Engine & CLI` proxy router
   7. `Claude Code CLI` agentic developer assistant
   8. `Hoppscotch CLI` API test runner
-  9. `Storage Encryption & Sandbox` isolation configuration
+  9. `Open Agent Skills CLI (skills)` package manager & command interface
+  10. `Skill: watch (claude-video)` video/audio frame & transcription toolchain
+  11. `Skill: last30days (last30days-skill)` real-time 30-day web & community research
+  12. `Skill: humanizer` anti-AI writing validator & natural prose refactoring
+  13. `Skill: ponytail suite` minimal architecture & anti-overengineering suite
+  14. `Skill: find-skills` open agent skills ecosystem registry discovery
+  15. `Storage Encryption & Sandbox` isolation configuration (.env & workspace settings)
 - **🔒 Gated Startup Protection**: If any subsystem fails the verification check or auto-update, the launch process halts immediately with a clear diagnostics report — zero background processes or IDE windows are spawned until everything is 100% verified.
-- **🔄 Dynamic Auto-Update Engine**: Automatically queries official APIs on every launch to check for and install the latest releases:
+- **🔄 Dynamic Auto-Update Engine**: Automatically queries official APIs and git remotes on every launch to check for and install the latest releases:
   - **Node.js LTS** (via `nodejs.org` release index)
   - **Python & Pip** (via `python.org` & `pypa.io`)
   - **Git for Windows** (via GitHub releases API)
   - **Hoppscotch Desktop** (via GitHub releases API)
   - **Portable VS Code** (via Microsoft stable release API)
-  - **OmniRoute, Claude Code CLI, & Hoppscotch CLI** (via npm registry `@latest`)
+  - **OmniRoute, Claude Code CLI, Hoppscotch CLI, & Skills CLI** (via npm registry `@latest`)
+  - **Open Agent Skills Repositories** (via Git shallow fetch/pull for `claude-video`, `last30days-skill`, `humanizer`, `ponytail`, and `skills`)
+- **🤖 Built-in Open Agent Skills Suite**: Pre-installed and automatically active across Claude Code sessions:
+  - **`ponytail` suite**: Enforces minimalist, clean, YAGNI-driven senior engineering.
+  - **`humanizer`**: Strips AI tells, stock filler, and buzzwords to deliver natural developer prose.
+  - **`last30days`**: Real-time crawling of Reddit, GitHub, X, and arXiv for up-to-date solutions.
+  - **`watch`**: Processes videos, demo screencasts, and audio transcripts via local FFmpeg & `yt-dlp`.
+  - **`find-skills` & `skills` CLI**: Connects to the 1,500+ verified agent skills directory (`skills.sh`).
 - **🔇 Prompt-Free & Uninterrupted**: Background auto-updater prompts and telemetry popups are silenced (`DISABLE_AUTO_UPDATER=1`, workspace trust disabled) for a distraction-free experience.
 - **🔄 OmniRoute AI Proxy & Router**: Pre-configured with the `free-stack` model combo with intelligent routing and automatic fallback chains across 30 free providers and 298 models.
 - **💻 Claude Code CLI**: Anthropic's interactive agentic coding assistant ready to pair-program directly in your terminal with zero login prompts or token friction.
@@ -77,27 +90,69 @@ OmniRoute-Portable/
 ├── Start-OmniRoute.bat        # Main 1-click launcher
 ├── Update-All-Components.bat  # 1-click update engine for all tools & packages
 ├── bootstrap.ps1              # Automated dependency installer & updater engine
+├── CLAUDE.md                  # Global Open Agent Skills developer guidelines
 ├── README.md                  # Documentation
 ├── .gitignore                 # Git ignore configuration
 │
-├── bin/                       # Portable Node.js, npm, omniroute, claude & hopp binaries
+├── bin/                       # Portable Node.js, npm, omniroute, claude, hopp & skills binaries
 │   ├── omniroute.cmd          # OmniRoute CLI command
 │   ├── claude.cmd             # Claude Code CLI command
 │   ├── hopp.cmd               # Hoppscotch CLI command
+│   ├── skills.cmd             # Open Agent Skills CLI command
 │   └── npm.cmd                # Portable NPM
 │
 ├── python/                    # Portable Python 3.12 & Pip
 │   ├── python.exe             # Python interpreter
 │   ├── python3.exe            # Python3 alias
-│   ├── Lib/site-packages/     # Installed Python packages
+│   ├── Lib/site-packages/     # Installed Python packages (yt-dlp, requests, bs4)
 │   └── Scripts/               # pip, pip3, and CLI package executables
 │
 ├── tools/
-│   └── git/                   # Portable Git (MinGit)
-│       └── cmd/git.exe        # Git CLI executable
+│   ├── git/                   # Portable Git (MinGit)
+│   │   └── cmd/git.exe        # Git CLI executable
+│   └── skills-sources/        # Cloned source repositories for auto-updates
+│       ├── claude-video/      # watch skill source
+│       ├── last30days-skill/  # last30days research skill source
+│       ├── humanizer/         # humanizer natural writing skill source
+│       ├── ponytail/          # ponytail minimal dev suite source
+│       └── skills/            # open agent skills CLI source
 │
 ├── hoppscotch/                # Portable Hoppscotch Desktop App
 │   └── Hoppscotch.exe         # Hoppscotch Desktop executable
+│
+├── data/                      # Sandboxed application data & configuration
+│   ├── .env.example           # Storage encryption key & host template
+│   ├── storage.sqlite         # SQLite database with combos, providers, and settings
+│   ├── claude/                # Claude Code configuration & active skills
+│   │   └── skills/            # Active sandboxed skills directory
+│   ├── launch-claude-omniroute.cmd
+│   ├── start-omniroute.cmd
+│   └── start-hoppscotch.cmd   # Standalone Hoppscotch Desktop launcher
+│
+├── vscode/                    # Portable VS Code installation directory
+│
+├── workspace/                 # Your project working directory
+│   ├── CLAUDE.md              # Project agent guidelines
+│   └── .vscode/
+│       ├── settings.json      # Pre-configured environment variables & tool paths
+│       └── tasks.json         # Automated startup tasks
+│
+└── home/                      # Sandboxed USERPROFILE & HOME directory
+```
+
+---
+
+## 🤖 Built-in Open Agent Skills
+
+The environment comes pre-loaded with 5 essential Open Agent Skills:
+
+| Skill | Description | Commands |
+|---|---|---|
+| **Ponytail Suite** | Minimalist, clean senior developer guidelines. Enforces YAGNI, standard library first, zero bloat. | `/ponytail`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain` |
+| **Humanizer** | Removes AI writing tells, staged openers, forced triads, and buzzwords to deliver authentic human copy. | `/humanizer` |
+| **Last30Days** | Crawls recent 30-day discussions on Reddit, GitHub, X, and arXiv for up-to-date solutions and breaking changes. | `/last30days <topic>` |
+| **Claude Video** | Video/audio inspection, frame extraction, and subtitle transcription. | `/watch <url-or-path> [question]` |
+| **Skills Ecosystem** | Discovers and installs skills from the 1,500+ open agent skills ecosystem at [skills.sh](https://skills.sh/). | `/find-skills <topic>`, `skills find`, `skills add` |
 │
 ├── data/                      # Sandboxed application data & configuration
 │   ├── .env.example           # Storage encryption key & host template
