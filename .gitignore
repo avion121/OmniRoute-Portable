@@ -56,6 +56,12 @@
 *.env.local
 push_repo.js
 
+# Skills cache & lockfiles
+/.agents/
+/.claude/
+/data/skills/
+skills-lock.json
+
 # User home profile directory
 /home/
 

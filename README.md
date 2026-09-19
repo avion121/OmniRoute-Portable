@@ -9,9 +9,9 @@ Everything runs completely isolated from your host system — settings, extensio
 ## ✨ Features
 
 - **⚡ 100% Zero Configuration / 1-Click Launch**: Clone the repository and double-click `Start-OmniRoute.bat`.
-- **🛡️ Strict 15-Point Pre-Launch Integrity Verification**: Before any background services or VS Code are started, a strict integrity suite actively validates the health of all 15 subsystems:
+- **🛡️ Strict 11-Point Pre-Launch Integrity Verification**: Before any background services or VS Code are started, a strict integrity suite actively validates the health of all 11 subsystems:
   1. `Node.js LTS & npm` runtime integrity
-  2. `Python 3.12+ & Pip` environment with activated `Lib/site-packages` & media packages
+  2. `Python 3.12+ & Pip` environment with activated `Lib/site-packages`
   3. `Git for Windows (MinGit)` binary & global configuration
   4. `Hoppscotch Desktop` application binary
   5. `Portable VS Code` IDE executable & portable user profile
@@ -19,27 +19,20 @@ Everything runs completely isolated from your host system — settings, extensio
   7. `Claude Code CLI` agentic developer assistant
   8. `Hoppscotch CLI` API test runner
   9. `Open Agent Skills CLI (skills)` package manager & command interface
-  10. `Skill: watch (claude-video)` video/audio frame & transcription toolchain
-  11. `Skill: last30days (last30days-skill)` real-time 30-day web & community research
-  12. `Skill: humanizer` anti-AI writing validator & natural prose refactoring
-  13. `Skill: ponytail suite` minimal architecture & anti-overengineering suite
-  14. `Skill: find-skills` open agent skills ecosystem registry discovery
-  15. `Storage Encryption & Sandbox` isolation configuration (.env & workspace settings)
+  10. `Skill: find-skills` dynamic open agent skills registry discovery meta-skill
+  11. `Storage Encryption & Sandbox` isolation configuration (.env & workspace settings)
 - **🔒 Gated Startup Protection**: If any subsystem fails the verification check or auto-update, the launch process halts immediately with a clear diagnostics report — zero background processes or IDE windows are spawned until everything is 100% verified.
-- **🔄 Dynamic Auto-Update Engine**: Automatically queries official APIs and git remotes on every launch to check for and install the latest releases:
+- **🔄 Dynamic Auto-Update Engine**: Automatically queries official APIs on every launch to check for and install the latest releases:
   - **Node.js LTS** (via `nodejs.org` release index)
   - **Python & Pip** (via `python.org` & `pypa.io`)
   - **Git for Windows** (via GitHub releases API)
   - **Hoppscotch Desktop** (via GitHub releases API)
   - **Portable VS Code** (via Microsoft stable release API)
   - **OmniRoute, Claude Code CLI, Hoppscotch CLI, & Skills CLI** (via npm registry `@latest`)
-  - **Open Agent Skills Repositories** (via Git shallow fetch/pull for `claude-video`, `last30days-skill`, `humanizer`, `ponytail`, and `skills`)
-- **🤖 Built-in Open Agent Skills Suite**: Pre-installed and automatically active across Claude Code sessions:
-  - **`ponytail` suite**: Enforces minimalist, clean, YAGNI-driven senior engineering.
-  - **`humanizer`**: Strips AI tells, stock filler, and buzzwords to deliver natural developer prose.
-  - **`last30days`**: Real-time crawling of Reddit, GitHub, X, and arXiv for up-to-date solutions.
-  - **`watch`**: Processes videos, demo screencasts, and audio transcripts via local FFmpeg & `yt-dlp`.
-  - **`find-skills` & `skills` CLI**: Connects to the 1,500+ verified agent skills directory (`skills.sh`).
+- **🤖 Dynamic On-Demand Agent Skills & Progressive Disclosure**:
+  - **Lean Core**: Ships with zero pre-loaded skill bloat for instant startup and lightning performance.
+  - **Progressive Disclosure**: Agents inspect project manifests (`package.json`, `tsconfig.json`, `requirements.txt`, etc.) and dynamically discover skills using `find-skills` and the portable `skills` CLI on demand.
+  - **1,500+ Skills Access**: Search and install official vendor skills on-the-fly (`skills find <query>`, `skills add <vendor/skill>`).
 - **🔇 Prompt-Free & Uninterrupted**: Background auto-updater prompts and telemetry popups are silenced (`DISABLE_AUTO_UPDATER=1`, workspace trust disabled) for a distraction-free experience.
 - **🔄 OmniRoute AI Proxy & Router**: Pre-configured with the `free-stack` model combo with intelligent routing and automatic fallback chains across 30 free providers and 298 models.
 - **💻 Claude Code CLI**: Anthropic's interactive agentic coding assistant ready to pair-program directly in your terminal with zero login prompts or token friction.
@@ -108,14 +101,8 @@ OmniRoute-Portable/
 │   └── Scripts/               # pip, pip3, and CLI package executables
 │
 ├── tools/
-│   ├── git/                   # Portable Git (MinGit)
-│   │   └── cmd/git.exe        # Git CLI executable
-│   └── skills-sources/        # Cloned source repositories for auto-updates
-│       ├── claude-video/      # watch skill source
-│       ├── last30days-skill/  # last30days research skill source
-│       ├── humanizer/         # humanizer natural writing skill source
-│       ├── ponytail/          # ponytail minimal dev suite source
-│       └── skills/            # open agent skills CLI source
+│   └── git/                   # Portable Git (MinGit)
+│       └── cmd/git.exe        # Git CLI executable
 │
 ├── hoppscotch/                # Portable Hoppscotch Desktop App
 │   └── Hoppscotch.exe         # Hoppscotch Desktop executable
@@ -123,8 +110,8 @@ OmniRoute-Portable/
 ├── data/                      # Sandboxed application data & configuration
 │   ├── .env.example           # Storage encryption key & host template
 │   ├── storage.sqlite         # SQLite database with combos, providers, and settings
-│   ├── claude/                # Claude Code configuration & active skills
-│   │   └── skills/            # Active sandboxed skills directory
+│   ├── claude/                # Claude Code configuration
+│   │   └── skills/            # Dynamic skills directory (find-skills meta-skill)
 │   ├── launch-claude-omniroute.cmd
 │   ├── start-omniroute.cmd
 │   └── start-hoppscotch.cmd   # Standalone Hoppscotch Desktop launcher
@@ -132,7 +119,7 @@ OmniRoute-Portable/
 ├── vscode/                    # Portable VS Code installation directory
 │
 ├── workspace/                 # Your project working directory
-│   ├── CLAUDE.md              # Project agent guidelines
+│   ├── CLAUDE.md              # Progressive disclosure & dynamic skills guidelines
 │   └── .vscode/
 │       ├── settings.json      # Pre-configured environment variables & tool paths
 │       └── tasks.json         # Automated startup tasks
@@ -142,20 +129,25 @@ OmniRoute-Portable/
 
 ---
 
-## 🤖 Built-in Open Agent Skills & Ecosystem
+## 🤖 Dynamic On-Demand Skills & Progressive Disclosure
 
-The environment comes pre-loaded with over **220+ Open Agent Skills** across 5 core suites and official vendor categories:
+The environment implements a lean on-demand architecture powered by the open agent skills ecosystem:
 
-| Skill Suite | Description | Commands & Examples |
-|---|---|---|
-| **Ponytail Suite** | Minimalist, clean senior developer guidelines. Enforces YAGNI, standard library first, and zero dependency bloat. | `/ponytail`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help` |
-| **Humanizer** | Removes AI writing tells, staged openers, forced triads, and buzzwords to deliver authentic human copy. | `/humanizer` |
-| **Last30Days** | Crawls recent 30-day discussions on Reddit, GitHub, X, and arXiv for up-to-date solutions and breaking changes. | `/last30days <topic>` |
-| **Claude Video** | Video/audio inspection, frame extraction, and subtitle transcription. | `/watch <url-or-path> [question]` |
-| **Skills Ecosystem CLI** | Discovers and installs skills from the 1,500+ open agent skills ecosystem at [skills.sh](https://skills.sh/). | `/find-skills <topic>`, `skills find`, `skills add <vendor/skill>`, `skills update` |
-| **Vercel Agent Skills** | Official React/Next.js optimizations, composition patterns, view transitions, and deployment workflows. | `react-best-practices`, `composition-patterns`, `react-native-skills`, `deploy-to-vercel` |
-| **Anthropic Skills** | Frontend design, theme factory, canvas design, doc coauthoring, MCP builders, and webapp testing. | `frontend-design`, `theme-factory`, `canvas-design`, `mcp-builder`, `webapp-testing` |
-| **System Architecture & Cloud** | Microservices, API design, event sourcing, multi-cloud Terraform, cost optimization, and RAG. | `architecture-patterns`, `api-design-principles`, `rag-implementation`, `terraform-module-library` |
+- **Progressive Disclosure Reflex**: Never assume skills exist. Inspect project files first, and fetch tools dynamically via `skills find` only when a task demands it.
+- **`find-skills` Discovery Meta-Skill**: Pre-installed meta-skill for discovering relevant tools across 1,500+ agent skills at [skills.sh](https://skills.sh/).
+- **Portable `skills` CLI**: Full command-line interface ready to search, install, and update vendor skills on the fly:
+  ```bash
+  # Search for specialized skills
+  skills find react
+  skills find playwright
+  skills find fast-api
+
+  # Add top official vendor skill to project
+  skills add vercel-labs/agent-skills@react-best-practices -y
+
+  # Update installed skills
+  skills update
+  ```
 
 ---
 
