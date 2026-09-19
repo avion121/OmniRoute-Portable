@@ -1,6 +1,8 @@
 # 🚀 OmniRoute Portable AI Developer Drive
 
-A complete, zero-setup, fully portable development environment bundling **OmniRoute**, **Claude Code CLI**, **Portable Python 3.12 (with Pip)**, **Portable Git for Windows**, **Portable Hoppscotch (Desktop & CLI)**, and **Portable VS Code**.
+A complete, zero-setup, fully portable development environment bundling **OmniRoute**, **Claude Code CLI**, **Portable Python 3.12 (with Pip)**, **Portable Git**, **Portable Hoppscotch (Desktop & CLI)**, and **Portable VS Code**.
+
+**Cross-Platform Ready**: 100% portable on **Windows**, **macOS (Apple Silicon & Intel)**, and **Linux (x86_64 & ARM64)**.
 
 Everything runs completely isolated from your host system — settings, extensions, API keys, cache, and workspace are all contained within this portable directory.
 
@@ -8,12 +10,14 @@ Everything runs completely isolated from your host system — settings, extensio
 
 ## ✨ Features
 
-- **⚡ 100% Zero Configuration / 1-Click Launch**: Clone the repository and double-click `Start-OmniRoute.bat`.
+- **⚡ 100% Zero Configuration / 1-Click Launch**:
+  - **Windows**: Double-click `Start-OmniRoute.bat`
+  - **macOS & Linux**: Run `./Start-OmniRoute.sh`
 - **🛡️ Strict 11-Point Pre-Launch Integrity Verification**: Before any background services or VS Code are started, a strict integrity suite actively validates the health of all 11 subsystems:
   1. `Node.js LTS & npm` runtime integrity
   2. `Python 3.12+ & Pip` environment with activated `Lib/site-packages`
-  3. `Git for Windows (MinGit)` binary & global configuration
-  4. `Hoppscotch Desktop` application binary
+  3. `Git` version control binary & global configuration isolation
+  4. `Hoppscotch Desktop` application binary / ecosystem
   5. `Portable VS Code` IDE executable & portable user profile
   6. `OmniRoute Engine & CLI` proxy router
   7. `Claude Code CLI` agentic developer assistant
@@ -25,7 +29,7 @@ Everything runs completely isolated from your host system — settings, extensio
 - **🔄 Dynamic Auto-Update Engine**: Automatically queries official APIs on every launch to check for and install the latest releases:
   - **Node.js LTS** (via `nodejs.org` release index)
   - **Python & Pip** (via `python.org` & `pypa.io`)
-  - **Git for Windows** (via GitHub releases API)
+  - **Git** (MinGit / native portable toolchain)
   - **Hoppscotch Desktop** (via GitHub releases API)
   - **Portable VS Code** (via Microsoft stable release API)
   - **OmniRoute, Claude Code CLI, Hoppscotch CLI, & Skills CLI** (via npm registry `@latest`)
@@ -51,24 +55,40 @@ git clone https://github.com/avion121/OmniRoute-Portable.git
 cd OmniRoute-Portable
 ```
 
-### 2. Run the Launcher
+### 2. Run the 1-Click Launcher
+
+#### On Windows:
 Double-click:
 ```bat
 Start-OmniRoute.bat
 ```
 
-> **Automated Setup on First Run**: If portable binaries (Node.js, Python, Git, Hoppscotch, and VS Code) are not yet on the drive, `Start-OmniRoute.bat` will automatically download and install everything via PowerShell in ~1-2 minutes. On subsequent runs, it starts instantly in under 2 seconds!
+#### On macOS / Linux:
+Make executable and run:
+```bash
+chmod +x *.sh data/*.sh
+./Start-OmniRoute.sh
+```
+
+> **Automated Setup on First Run**: If portable binaries (Node.js, Python, Git, Hoppscotch, and VS Code) are not yet on the drive, the bootstrapper will automatically download, extract, and configure everything in ~1-2 minutes. On subsequent runs, it starts instantly in under 2 seconds!
 
 ### 3. Update Everything Anytime
-To manually trigger a complete check and update for all components and tools, double-click:
+
+#### On Windows:
+Double-click:
 ```bat
 Update-All-Components.bat
+```
+
+#### On macOS / Linux:
+```bash
+./Update-All-Components.sh
 ```
 
 ### 4. Start Coding with Claude Code
 1. VS Code will open automatically focused on the `workspace/` folder.
 2. Open the integrated terminal in VS Code:
-   - Shortcut: `Ctrl + ~` (or ``Ctrl + ` ``)
+   - Shortcut: `Ctrl + ~` (or ``Ctrl + ` `` / `Cmd + ` `)
 3. Run Claude Code connected to OmniRoute:
    ```bash
    omniroute launch --model free-stack
@@ -80,48 +100,53 @@ Update-All-Components.bat
 
 ```
 OmniRoute-Portable/
-├── Start-OmniRoute.bat        # Main 1-click launcher
-├── Update-All-Components.bat  # 1-click update engine for all tools & packages
-├── bootstrap.ps1              # Automated dependency installer & updater engine
+├── Start-OmniRoute.bat        # Windows 1-click launcher
+├── Start-OmniRoute.sh         # macOS & Linux 1-click launcher
+├── Update-All-Components.bat  # Windows 1-click component updater
+├── Update-All-Components.sh   # macOS & Linux 1-click component updater
+├── bootstrap.ps1              # Windows automated installer & updater engine
+├── bootstrap.sh               # macOS & Linux automated installer & updater engine
 ├── CLAUDE.md                  # Global Open Agent Skills developer guidelines
 ├── README.md                  # Documentation
 ├── .gitignore                 # Git ignore configuration
 │
 ├── bin/                       # Portable Node.js, npm, omniroute, claude, hopp & skills binaries
-│   ├── omniroute.cmd          # OmniRoute CLI command
-│   ├── claude.cmd             # Claude Code CLI command
-│   ├── hopp.cmd               # Hoppscotch CLI command
-│   ├── skills.cmd             # Open Agent Skills CLI command
-│   └── npm.cmd                # Portable NPM
+│   ├── omniroute              # OmniRoute CLI (POSIX)
+│   ├── omniroute.cmd          # OmniRoute CLI (Windows)
+│   ├── claude                 # Claude Code CLI (POSIX)
+│   ├── claude.cmd             # Claude Code CLI (Windows)
+│   ├── hopp                   # Hoppscotch CLI (POSIX)
+│   ├── hopp.cmd               # Hoppscotch CLI (Windows)
+│   ├── skills                 # Open Agent Skills CLI (POSIX)
+│   ├── skills.cmd             # Open Agent Skills CLI (Windows)
+│   └── npm.cmd / npm          # Portable NPM
 │
 ├── python/                    # Portable Python 3.12 & Pip
-│   ├── python.exe             # Python interpreter
-│   ├── python3.exe            # Python3 alias
+│   ├── python.exe / python3   # Python interpreter
 │   ├── Lib/site-packages/     # Installed Python packages (yt-dlp, requests, bs4)
-│   └── Scripts/               # pip, pip3, and CLI package executables
+│   └── Scripts/ / bin/        # pip, pip3, and CLI package executables
 │
 ├── tools/
-│   └── git/                   # Portable Git (MinGit)
-│       └── cmd/git.exe        # Git CLI executable
+│   └── git/                   # Portable Git
+│       └── cmd/git.exe / bin  # Git CLI executable
 │
-├── hoppscotch/                # Portable Hoppscotch Desktop App
-│   └── Hoppscotch.exe         # Hoppscotch Desktop executable
+├── hoppscotch/                # Portable Hoppscotch Desktop App & Data
 │
 ├── data/                      # Sandboxed application data & configuration
 │   ├── .env.example           # Storage encryption key & host template
 │   ├── storage.sqlite         # SQLite database with combos, providers, and settings
 │   ├── claude/                # Claude Code configuration
 │   │   └── skills/            # Dynamic skills directory (find-skills meta-skill)
-│   ├── launch-claude-omniroute.cmd
-│   ├── start-omniroute.cmd
-│   └── start-hoppscotch.cmd   # Standalone Hoppscotch Desktop launcher
+│   ├── launch-claude-omniroute.bat / .sh
+│   ├── start-omniroute.bat / .sh
+│   └── start-hoppscotch.bat / .sh
 │
 ├── vscode/                    # Portable VS Code installation directory
 │
 ├── workspace/                 # Your project working directory
 │   ├── CLAUDE.md              # Progressive disclosure & dynamic skills guidelines
 │   └── .vscode/
-│       ├── settings.json      # Pre-configured environment variables & tool paths
+│       ├── settings.json      # Cross-platform environment variables (Win/Mac/Linux)
 │       └── tasks.json         # Automated startup tasks
 │
 └── home/                      # Sandboxed USERPROFILE & HOME directory
@@ -154,7 +179,7 @@ The environment implements a lean on-demand architecture powered by the open age
 ## ⚙️ Configuration & Customization
 
 ### OmniRoute Web UI
-When `Start-OmniRoute.bat` is running, the OmniRoute web dashboard is accessible at:
+When `Start-OmniRoute` is running, the OmniRoute web dashboard is accessible at:
 - **URL**: [http://127.0.0.1:20128](http://127.0.0.1:20128)
 
 From the dashboard you can:
@@ -170,14 +195,14 @@ To work on your existing code:
 
 ### Hoppscotch API Testing
 You can use Hoppscotch in two ways:
-1. **Desktop App**: Double-click `data/start-hoppscotch.cmd` or launch `hoppscotch/Hoppscotch.exe` to open the full UI.
+1. **Desktop App**: Launch `data/start-hoppscotch.bat` (or `data/start-hoppscotch.sh` on Unix) to open the full UI.
 2. **CLI**: Run collections and tests directly from terminal:
    ```bash
    hopp test collection.json
    ```
 
 ### Python & Pip Usage
-The terminal in VS Code is automatically pre-configured with Python and Pip in its PATH:
+The terminal in VS Code is automatically pre-configured with Python and Pip in its PATH across Windows, macOS, and Linux:
 ```bash
 # Check Python and Pip versions
 python --version
@@ -200,7 +225,7 @@ git commit -m "Initial commit"
 ## 🛠️ Troubleshooting
 
 - **OmniRoute port conflict (20128)**: Ensure no other instance of OmniRoute or proxy is running on port `20128`.
-- **First-run download issues**: Ensure you have an active internet connection so PowerShell can download portable Node.js, Python, Git, Hoppscotch, and VS Code archives.
+- **First-run download issues**: Ensure you have an active internet connection so the bootstrapper can download portable Node.js, Python, Git, Hoppscotch, and VS Code archives.
 - **Database / Encryption**: The `data/.env` file contains the `STORAGE_ENCRYPTION_KEY` matching the included `data/storage.sqlite` database. The launcher automatically creates `.env` on first launch.
 
 ---
