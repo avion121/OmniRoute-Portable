@@ -211,6 +211,41 @@ $wsSettings = Join-Path $WORKSPACE_DIR ".vscode\settings.json"
 }
 "@ | Set-Content -Path $wsSettings -Encoding UTF8
 
+# Ensure workspace\.vscode\tasks.json exists with isolated sandbox variables
+$wsTasks = Join-Path $WORKSPACE_DIR ".vscode\tasks.json"
+@"
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Claude Code",
+            "type": "shell",
+            "command": "claude",
+            "options": {
+                "env": {
+                    "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128/v1",
+                    "ANTHROPIC_API_KEY": "sk-portable-omniroute",
+                    "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
+                    "CLAUDE_CONFIG_DIR": "`${workspaceFolder}/../data/claude",
+                    "DISABLE_AUTO_UPDATER": "1",
+                    "CLAUDE_AUTO_UPDATER": "disabled",
+                    "CLAUDE_CODE_DISABLE_UPDATE_CHECK": "1"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
+"@ | Set-Content -Path $wsTasks -Encoding UTF8
+
 # Ensure Claude Code settings disable prompt-based auto-updater
 $claudeSettingsFile = Join-Path $CLAUDE_DIR "settings.json"
 @"
@@ -542,27 +577,54 @@ if ($shouldUpdateCode) {
 # ------------------------------------------------------------------------------
 # 7. ALWAYS-LATEST AUTO-UPDATE FOR CLI PACKAGES & PIP
 # ------------------------------------------------------------------------------
-$omnirouteMjs = Join-Path $BIN_DIR "node_modules\omniroute\bin\omniroute.mjs"
-$claudePkg = Join-Path $BIN_DIR "node_modules\@anthropic-ai\claude-code"
-$hoppPkg = Join-Path $BIN_DIR "node_modules\@hoppscotch\cli"
+$omniPkgJson = Join-Path $BIN_DIR "node_modules\omniroute\package.json"
+$claudePkgJson = Join-Path $BIN_DIR "node_modules\@anthropic-ai\claude-code\package.json"
+$hoppPkgJson = Join-Path $BIN_DIR "node_modules\@hoppscotch\cli\package.json"
 
-Write-Host "  [6/6] Auto-verifying and updating OmniRoute, Claude Code, and Hoppscotch CLI (@latest)..." -ForegroundColor Yellow
+$curOmniVer = ""
+$curClaudeVer = ""
+$curHoppVer = ""
+
+if (Test-Path $omniPkgJson) { try { $curOmniVer = (Get-Content $omniPkgJson -Raw | ConvertFrom-Json).version } catch {} }
+if (Test-Path $claudePkgJson) { try { $curClaudeVer = (Get-Content $claudePkgJson -Raw | ConvertFrom-Json).version } catch {} }
+if (Test-Path $hoppPkgJson) { try { $curHoppVer = (Get-Content $hoppPkgJson -Raw | ConvertFrom-Json).version } catch {} }
+
+$latestOmniVer = ""
+$latestClaudeVer = ""
+$latestHoppVer = ""
 
 try {
-    & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest --prefix "$BIN_DIR" --no-audit --no-fund
-    if ($LASTEXITCODE -ne 0) {
-        & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest --prefix "$BIN_DIR" --legacy-peer-deps --no-audit --no-fund
-    }
+    $latestOmniVer = (& "$nodeExe" "$npmCli" view omniroute version 2>$null).Trim()
+    $latestClaudeVer = (& "$nodeExe" "$npmCli" view @anthropic-ai/claude-code version 2>$null).Trim()
+    $latestHoppVer = (& "$nodeExe" "$npmCli" view @hoppscotch/cli version 2>$null).Trim()
+} catch {}
 
-    # Update pip, setuptools, wheel in portable python
-    if (Test-Path $pipExe) {
-        & "$pythonExe" -m pip install --upgrade --no-cache-dir pip setuptools wheel --no-warn-script-location 2>$null | Out-Null
-    }
+$needsCliUpdate = $ForceUpdate -or `
+    (-not (Test-Path $omniPkgJson)) -or (-not (Test-Path $claudePkgJson)) -or (-not (Test-Path $hoppPkgJson)) -or `
+    ($latestOmniVer -ne "" -and $curOmniVer -ne $latestOmniVer) -or `
+    ($latestClaudeVer -ne "" -and $curClaudeVer -ne $latestClaudeVer) -or `
+    ($latestHoppVer -ne "" -and $curHoppVer -ne $latestHoppVer)
 
-    (Get-Date).ToString("o") | Set-Content -Path (Join-Path $DATA_DIR "last_update_check.timestamp") -Encoding UTF8
-    Write-Host "  [OK] All CLI packages, tools, and libraries are updated to @latest." -ForegroundColor Green
-} catch {
-    Write-Host "  [OK] Using verified local packages: Ready." -ForegroundColor Green
+if ($needsCliUpdate) {
+    Write-Host "  [6/6] Auto-updating OmniRoute, Claude Code, and Hoppscotch CLI (@latest)..." -ForegroundColor Yellow
+    try {
+        & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest --prefix "$BIN_DIR" --no-audit --no-fund
+        if ($LASTEXITCODE -ne 0) {
+            & "$nodeExe" "$npmCli" install -g omniroute@latest @anthropic-ai/claude-code@latest @hoppscotch/cli@latest --prefix "$BIN_DIR" --legacy-peer-deps --no-audit --no-fund
+        }
+
+        # Update pip, setuptools, wheel in portable python
+        if (Test-Path $pipExe) {
+            & "$pythonExe" -m pip install --upgrade --no-cache-dir pip setuptools wheel --no-warn-script-location 2>$null | Out-Null
+        }
+
+        (Get-Date).ToString("o") | Set-Content -Path (Join-Path $DATA_DIR "last_update_check.timestamp") -Encoding UTF8
+        Write-Host "  [OK] All CLI packages, tools, and libraries are updated to @latest." -ForegroundColor Green
+    } catch {
+        Write-Host "  [OK] Using verified local packages: Ready." -ForegroundColor Green
+    }
+} else {
+    Write-Host "  [OK] All CLI packages are latest (OmniRoute: $curOmniVer, Claude: $curClaudeVer, Hopp: $curHoppVer): Ready." -ForegroundColor Green
 }
 
 # ------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-{
+﻿{
     "version": "2.0.0",
     "tasks": [
         {
@@ -10,7 +10,10 @@
                     "ANTHROPIC_BASE_URL": "http://127.0.0.1:20128/v1",
                     "ANTHROPIC_API_KEY": "sk-portable-omniroute",
                     "ANTHROPIC_AUTH_TOKEN": "sk-portable-omniroute",
-                    "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude"
+                    "CLAUDE_CONFIG_DIR": "${workspaceFolder}/../data/claude",
+                    "DISABLE_AUTO_UPDATER": "1",
+                    "CLAUDE_AUTO_UPDATER": "disabled",
+                    "CLAUDE_CODE_DISABLE_UPDATE_CHECK": "1"
                 }
             },
             "presentation": {
