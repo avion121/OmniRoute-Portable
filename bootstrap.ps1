@@ -652,7 +652,10 @@ $skillRepos = @(
     @{ Name = "last30days-skill"; Url = "https://github.com/mvanhorn/last30days-skill.git" },
     @{ Name = "humanizer"; Url = "https://github.com/blader/humanizer.git" },
     @{ Name = "ponytail"; Url = "https://github.com/DietrichGebert/ponytail.git" },
-    @{ Name = "skills"; Url = "https://github.com/vercel-labs/skills.git" }
+    @{ Name = "skills"; Url = "https://github.com/vercel-labs/skills.git" },
+    @{ Name = "vercel-agent-skills"; Url = "https://github.com/vercel-labs/agent-skills.git" },
+    @{ Name = "anthropic-skills"; Url = "https://github.com/anthropics/skills.git" },
+    @{ Name = "wshobson-agents"; Url = "https://github.com/wshobson/agents.git" }
 )
 
 foreach ($repo in $skillRepos) {
@@ -715,8 +718,39 @@ foreach ($target in $targetSkillDirs) {
         if (-not (Test-Path $fDst)) { New-Item -ItemType Directory -Path $fDst -Force | Out-Null }
         Copy-Item -Path "$fSrc\*" -Destination $fDst -Recurse -Force -ErrorAction SilentlyContinue
     }
+
+    # 6. Vercel Agent Skills
+    $vSrc = Join-Path $SKILLS_SRC_DIR "vercel-agent-skills\skills"
+    if (Test-Path $vSrc) {
+        Get-ChildItem -Path $vSrc -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $vDst = Join-Path $target $_.Name
+            if (-not (Test-Path $vDst)) { New-Item -ItemType Directory -Path $vDst -Force | Out-Null }
+            Copy-Item -Path "$($_.FullName)\*" -Destination $vDst -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    # 7. Anthropic Skills
+    $aSrc = Join-Path $SKILLS_SRC_DIR "anthropic-skills\skills"
+    if (Test-Path $aSrc) {
+        Get-ChildItem -Path $aSrc -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $aDst = Join-Path $target $_.Name
+            if (-not (Test-Path $aDst)) { New-Item -ItemType Directory -Path $aDst -Force | Out-Null }
+            Copy-Item -Path "$($_.FullName)\*" -Destination $aDst -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    # 8. All installed ecosystem skills in home\.agents\skills
+    $allAgentSkills = Join-Path $HOME_DIR ".agents\skills"
+    if (Test-Path $allAgentSkills) {
+        Get-ChildItem -Path $allAgentSkills -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $eDst = Join-Path $target $_.Name
+            if (-not (Test-Path $eDst)) { New-Item -ItemType Directory -Path $eDst -Force | Out-Null }
+            Copy-Item -Path "$($_.FullName)\*" -Destination $eDst -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
 }
-Write-Host "  [OK] Open Agent Skills (watch, last30days, humanizer, ponytail suite, find-skills) synced and active." -ForegroundColor Green
+$installedCount = (Get-ChildItem -Path $CLAUDE_SKILLS_DIR -Directory -ErrorAction SilentlyContinue).Count
+Write-Host "  [OK] Open Agent Skills ecosystem ($installedCount active skills) synced and active." -ForegroundColor Green
 
 # ------------------------------------------------------------------------------
 # 9. COMPREHENSIVE END-TO-END INTEGRITY & FUNCTIONALITY VERIFICATION
@@ -920,18 +954,19 @@ try {
     Write-Host "  [FAIL 13/15] Skill 'ponytail' verification failed: $_" -ForegroundColor Red
 }
 
-# 14. Verify Agent Skill: find-skills
+# 14. Verify Open Agent Skills Ecosystem
 try {
     $findSkillFile = Join-Path $CLAUDE_SKILLS_DIR "find-skills\SKILL.md"
-    if (Test-Path $findSkillFile) {
-        Write-Host "  [VERIFIED 14/15] Skill 'find-skills' (open registry discovery) is active and verified." -ForegroundColor Green
+    $totalSkillsCount = (Get-ChildItem -Path $CLAUDE_SKILLS_DIR -Directory -ErrorAction SilentlyContinue).Count
+    if ((Test-Path $findSkillFile) -and ($totalSkillsCount -gt 10)) {
+        Write-Host "  [VERIFIED 14/15] Open Agent Skills Ecosystem ($totalSkillsCount active skills verified across all categories)." -ForegroundColor Green
     } else {
-        throw "find-skills skill file missing at $findSkillFile"
+        throw "find-skills skill file missing or insufficient skills count ($totalSkillsCount)"
     }
 } catch {
     $verificationFailed = $true
-    $failureReasons += "Skill 'find-skills' error: $_"
-    Write-Host "  [FAIL 14/15] Skill 'find-skills' verification failed: $_" -ForegroundColor Red
+    $failureReasons += "Open Agent Skills ecosystem error: $_"
+    Write-Host "  [FAIL 14/15] Open Agent Skills ecosystem verification failed: $_" -ForegroundColor Red
 }
 
 # 15. Verify Isolation & Encryption Configuration

@@ -142,35 +142,20 @@ OmniRoute-Portable/
 
 ---
 
-## 🤖 Built-in Open Agent Skills
+## 🤖 Built-in Open Agent Skills & Ecosystem
 
-The environment comes pre-loaded with 5 essential Open Agent Skills:
+The environment comes pre-loaded with over **220+ Open Agent Skills** across 5 core suites and official vendor categories:
 
-| Skill | Description | Commands |
+| Skill Suite | Description | Commands & Examples |
 |---|---|---|
-| **Ponytail Suite** | Minimalist, clean senior developer guidelines. Enforces YAGNI, standard library first, zero bloat. | `/ponytail`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain` |
+| **Ponytail Suite** | Minimalist, clean senior developer guidelines. Enforces YAGNI, standard library first, and zero dependency bloat. | `/ponytail`, `/ponytail-review`, `/ponytail-audit`, `/ponytail-debt`, `/ponytail-gain`, `/ponytail-help` |
 | **Humanizer** | Removes AI writing tells, staged openers, forced triads, and buzzwords to deliver authentic human copy. | `/humanizer` |
 | **Last30Days** | Crawls recent 30-day discussions on Reddit, GitHub, X, and arXiv for up-to-date solutions and breaking changes. | `/last30days <topic>` |
 | **Claude Video** | Video/audio inspection, frame extraction, and subtitle transcription. | `/watch <url-or-path> [question]` |
-| **Skills Ecosystem** | Discovers and installs skills from the 1,500+ open agent skills ecosystem at [skills.sh](https://skills.sh/). | `/find-skills <topic>`, `skills find`, `skills add` |
-│
-├── data/                      # Sandboxed application data & configuration
-│   ├── .env.example           # Storage encryption key & host template
-│   ├── storage.sqlite         # SQLite database with combos, providers, and settings
-│   ├── claude/                # Claude Code configuration directory
-│   ├── launch-claude-omniroute.cmd
-│   ├── start-omniroute.cmd
-│   └── start-hoppscotch.cmd   # Standalone Hoppscotch Desktop launcher
-│
-├── vscode/                    # Portable VS Code installation directory
-│
-├── workspace/                 # Your project working directory
-│   └── .vscode/
-│       ├── settings.json      # Pre-configured environment variables & tool paths
-│       └── tasks.json         # Automated startup tasks
-│
-└── home/                      # Sandboxed USERPROFILE & HOME directory
-```
+| **Skills Ecosystem CLI** | Discovers and installs skills from the 1,500+ open agent skills ecosystem at [skills.sh](https://skills.sh/). | `/find-skills <topic>`, `skills find`, `skills add <vendor/skill>`, `skills update` |
+| **Vercel Agent Skills** | Official React/Next.js optimizations, composition patterns, view transitions, and deployment workflows. | `react-best-practices`, `composition-patterns`, `react-native-skills`, `deploy-to-vercel` |
+| **Anthropic Skills** | Frontend design, theme factory, canvas design, doc coauthoring, MCP builders, and webapp testing. | `frontend-design`, `theme-factory`, `canvas-design`, `mcp-builder`, `webapp-testing` |
+| **System Architecture & Cloud** | Microservices, API design, event sourcing, multi-cloud Terraform, cost optimization, and RAG. | `architecture-patterns`, `api-design-principles`, `rag-implementation`, `terraform-module-library` |
 
 ---
 
