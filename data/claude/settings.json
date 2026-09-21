@@ -1,4 +1,5 @@
-﻿{
-    "theme": "dark",
-    "autoUpdaterStatus": "disabled"
+{
+  "theme": "dark",
+  "autoUpdaterStatus": "disabled",
+  "skipDangerousModePermissionPrompt": true
 }
