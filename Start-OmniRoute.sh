@@ -95,16 +95,28 @@ echo -e "  Starting OmniRoute Proxy Server..."
 echo -e "${CLR_GREEN}==============================================================================${CLR_RESET}"
 
 OMNI_PID=""
+BRIDGE_PID=""
 cleanup() {
     echo ""
     echo -e "  Stopping OmniRoute background server..."
     if [[ -n "$OMNI_PID" ]]; then
         kill "$OMNI_PID" 2>/dev/null || true
     fi
+    if [[ -n "$BRIDGE_PID" ]]; then
+        kill "$BRIDGE_PID" 2>/dev/null || true
+    fi
     pkill -f "omniroute" 2>/dev/null || true
+    pkill -f "gateway-bridge.js" 2>/dev/null || true
     echo -e "  ${CLR_GREEN}Shutdown complete.${CLR_RESET}"
 }
 trap cleanup EXIT INT TERM
+
+# Start multi-gateway bridge for 15 local gateway nodes
+if [[ -f "$DATA_DIR/gateway-bridge.js" ]]; then
+    node "$DATA_DIR/gateway-bridge.js" > "$DATA_DIR/logs/gateway-bridge.log" 2>&1 &
+    BRIDGE_PID=$!
+    echo -e "  Multi-Gateway Bridge Status : ${CLR_GREEN}ACTIVE${CLR_RESET}"
+fi
 
 if curl -s "http://127.0.0.1:20128/api/monitoring/health" >/dev/null 2>&1; then
     echo -e "  OmniRoute server is already running on http://127.0.0.1:20128"
