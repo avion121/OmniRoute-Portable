@@ -25,6 +25,7 @@
 /data/omniroute.log
 /data/*.timestamp
 /data/logs/
+/data/log_archives/
 /data/call_logs/
 /data/cache/
 /data/temp/

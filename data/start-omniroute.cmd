@@ -44,6 +44,9 @@ echo %OMNIROUTE_DATA_DIR%
 echo.
 echo Starting Multi-Gateway Bridge...
 start /b "" node "%USB_ROOT%\data\gateway-bridge.js" > "%USB_ROOT%\data\logs\gateway-bridge.log" 2>&1
+
+node "%USB_ROOT%\data\apply-combo-patch.js" > nul 2>&1
+
 echo.
 echo Server:
 echo http://127.0.0.1:20128
